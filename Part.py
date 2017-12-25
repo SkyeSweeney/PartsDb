@@ -74,10 +74,22 @@ class Part():
         # For each field
         for fld in self.flds:
             exec("v=self.%s" % (fld[1]))
-            retval = retval + '"%s"' % v + ","
+            if ("TEXT" in fld[3]):
+                retval = retval + '"%s"' % v + ","
+            elif ("INTEGER" in fld[3]):
+                retval = retval + '%d' % v + ","
+            else:
+                pass
         #
         retval = retval[:-1]
         return retval
+    #
+
+    ###################################################################
+    # Get list of fields
+    ###################################################################
+    def getFields(self, n):
+        return self.flds[n]
     #
 
     ###################################################################
@@ -99,7 +111,13 @@ class Part():
     # Set value by index
     ###################################################################
     def setValueByIndex(self, n, val):
-        exec("self.%s=%s" % (self.flds[n][1],val))
+        if (isinstance(val, str)):
+            exec('self.%s="%s"' % (self.flds[n][1],val))
+        elif (isinstance(val, int)):
+            exec("self.%s=%s" % (self.flds[n][1],val))
+        else:
+            print "Invalid type", type(val)
+        #
     #
 
     ###################################################################

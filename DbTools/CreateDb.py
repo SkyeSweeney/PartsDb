@@ -34,17 +34,31 @@ if __name__ == "__main__":
     # for each field in part
     for i in range(part.getNumFields()):
 
-        # Populate part
-        part.setValueByIndex(i, str(i))
+        t = part.getFields(i)[3]   # Type
+        n = part.getFields(i)[1]   # Sql Name
+
+        if ("TEXT" in t):
+            part.setValueByIndex(i, "F-%s-%d"%(n,i))
+        elif ("INTEGER" in t):
+            part.setValueByIndex(i, i)
+        else:
+            pass
+        #
+
     #
 
     # Add the record
-    print "111"
-    db.AddRecord(part, commit=True)
-    print "222"
+    db.AddRecord(part, commit=False)
+    part.setValueByIndex(0, 1)
+    db.AddRecord(part, commit=False)
+    part.setValueByIndex(0, 2)
+    db.AddRecord(part, commit=False)
+    part.setValueByIndex(0, 3)
+    db.AddRecord(part, commit=False)
+    part.setValueByIndex(0, 4)
+    db.AddRecord(part, commit=False)
 
     db.EndTransaction()
-    print "333"
 
     # Add some classes to the DB
     db.AddCategory("Opto")
@@ -61,4 +75,3 @@ if __name__ == "__main__":
     db.CloseDataBase()  
 
     print "Done"
-    time.sleep(2.00)

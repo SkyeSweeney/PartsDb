@@ -10,6 +10,7 @@ import wx
 import time
 import PartsDialog
 import Part
+import Parts
 import MyGrid
 
 
@@ -34,8 +35,30 @@ class MyFrame(wx.Frame):
                           pos=(150, 150), 
                           size=(700, 500))
 
-        # Create the menubar
-        menuBar = wx.MenuBar()
+        # Create the menu system
+        self.CreateMenu()
+
+        # Create the toolbar
+        self.CreateToolbar()
+
+        # Create the status bar on the bottom
+        self.CreateStatusBar()
+
+        # Create the default filter
+        self.filt = Part.Part()
+        self.filt.setAll("*")
+
+        self.db = Parts.Parts()
+        self.db.OpenDataBase()
+
+        # Draw grid on pane
+        self.grid = MyGrid.MyGrid(self, self.db)
+    #
+
+    ###################################################################
+    # 
+    ###################################################################
+    def CreateMenu(self):
 
         # Create the "File" menu
         fileMenu = wx.Menu()
@@ -63,12 +86,19 @@ class MyFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.OnViewGroup,   id=self.ID_VIEW_GROUP)
         self.Bind(wx.EVT_MENU, self.OnViewSearch,  id=self.ID_VIEW_SEARCH)
 
+        # Create the menubar
+        menuBar = wx.MenuBar()
+
         # And put the menu on the menubar
         menuBar.Append(fileMenu, "&File")
         menuBar.Append(viewMenu, "&View")
         self.SetMenuBar(menuBar)
+    #
 
-        # Create the toolbar
+    ###################################################################
+    # 
+    ###################################################################
+    def CreateToolbar(self):
         #wx.ART_ADD_BOOKMARK
         #wx.ART_DEL_BOOKMARK
         #wx.ART_HELP_SIDE_PANEL
@@ -129,16 +159,6 @@ class MyFrame(wx.Frame):
 
         self.Bind(wx.EVT_TOOL, self.OnFileExit,       toolQuit)
         self.Bind(wx.EVT_TOOL, self.OnFileOpen,       toolOpen)
-
-        # Create the status bar on the bottom
-        self.CreateStatusBar()
-
-        # Create the default filter
-        self.filt = Part.Part()
-        self.filt.setAll("*")
-
-        # Draw grid on pane
-        self.grid = MyGrid.MyGrid(self)
     #
 
 

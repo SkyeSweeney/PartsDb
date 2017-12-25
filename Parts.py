@@ -37,6 +37,7 @@ class Parts():
     
         # If it does not, create it
         if (not exists):
+            print "Could not find db file. Creating new one"
             self.CreateDataBase()
         #
     #
@@ -48,23 +49,25 @@ class Parts():
 
         part = Part.Part()
         n = part.getSqlFieldName(0)
-        cmd = "CREATE TABLE PartsTbl(%s text PRIMARY KEY," % n
+        cmd = "CREATE TABLE PartsTbl("
 
-        for i in range(1,part.getNumFields()):
-            n = part.getSqlFieldName(i)
-            cmd = cmd + "%s text,"%n
+        for i in range(part.getNumFields()):
+            n = part.getSqlFieldName(i)   # field name
+            t = part.getFields(i)[3]      # field type
+            cmd = cmd + "%s %s," % (n, t)
         #
         cmd = cmd[:-1] + ")"
-        print cmd
 
         self.c.execute(cmd)
         self.conn.commit()
   
+        # Create the Category table (FET, Sensor, ...)
         cmd = "CREATE TABLE CategoryTbl(CategoryID INTEGER PRIMARY KEY, " +\
                                         "Class   text)"
         self.c.execute(cmd)
         self.conn.commit()
   
+        # Create the Project table (Sailboat timer, Energy monitor, ...)
         cmd = "CREATE TABLE ProjectTbl(ProjectID INTEGER PRIMARY KEY, " +\
                                        "Project   text)"
         self.c.execute(cmd)
@@ -81,15 +84,35 @@ class Parts():
     ###################################################################
     #
     ###################################################################
+    def GetAllRecords(self):
+        cmd = "SELECT * FROM PartsTbl;"
+        try:
+            rows = []
+            for row in self.c.execute(cmd):
+                rows.append(row)
+            #
+        except sqlite3.Error as e:
+            print e.args[0]
+        #
+
+        return rows  
+    #
+  
+    ###################################################################
+    #
+    ###################################################################
     def GetRecordBy(self, field, value):
         cmd = "SELECT * FROM PartsTbl WHERE %s == %s" % (field, str(value))
         print cmd
         try:
             rows = []
             for row in self.c.execute(cmd):
-               rows.append(row)
+                rows.append(row)
+            #
         except sqlite3.Error as e:
             print e.args[0]
+        #
+
         return rows  
     #
   
@@ -107,6 +130,7 @@ class Parts():
             
         except sqlite3.Error as e:
             print __name__, e.args[0]
+        #
     #
   
     ###################################################################

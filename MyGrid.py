@@ -14,10 +14,15 @@ class MyGrid(gridlib.Grid):
     ###################################################################
     #
     ###################################################################
-    def __init__(self, parent):
+    def __init__(self, parent, db):
+
         gridlib.Grid.__init__(self, parent, -1)
+
+        self.db = db
+
         self.moveTo = None
 
+        # Get list of all fields
         flds = Fields.Fields().getFields()
         n = len(flds)
 
@@ -25,7 +30,7 @@ class MyGrid(gridlib.Grid):
         self.CreateGrid(0, n)  # Row, col
 
         for f in flds:
-          self.SetColLabelValue(f[0], f[1])
+            self.SetColLabelValue(f[0], f[1])
         #
 
         # Column widths
@@ -36,30 +41,13 @@ class MyGrid(gridlib.Grid):
         # Set all text columns as left and bottom aligned
         self.SetColLabelAlignment(wx.ALIGN_LEFT, wx.ALIGN_BOTTOM)
 
+        # For each item in the database
+        rows = self.db.GetAllRecords()
+        for row in rows:
+            print row
+
         # Add data to grid
         part = Part.Part()
-        part.PartNo         = "1"
-        part.Barcode        = "2"
-        part.Vendor         = "3"
-        part.VendorPartNo   = "4"
-        part.VendorBarcode  = "5"
-        part.VendorWebsite  = "6"
-        part.Mfg            = "7"
-        part.MfgPartNo      = "8"
-        part.MfgBarcode     = "9"
-        part.MfgWebsite     = "0"
-        part.Quatity        = "10"
-        part.Title          = "11"
-        part.Description    = "12"
-        part.Catagory       = "13"
-        part.Package        = "14"
-        part.Location       = "15"
-        part.Notes          = "17"
-        self.AppendRecord(part)
-        self.AppendRecord(part)
-        self.AppendRecord(part)
-        self.AppendRecord(part)
-        self.AppendRecord(part)
         self.AppendRecord(part)
 
 
