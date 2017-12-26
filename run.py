@@ -36,14 +36,11 @@ class Log:
     def WriteText(self, text):
         if text[-1:] == '\n':
             text = text[:-1]
-        #
         wx.LogMessage(text)
-    #
     write = WriteText
 
 
 class RunDemoApp(wx.App, wx.lib.mixins.inspection.InspectionMixin):
-
     def __init__(self, name, module, useShell):
         self.name = name
         self.demoModule = module
@@ -122,27 +119,28 @@ class RunDemoApp(wx.App, wx.lib.mixins.inspection.InspectionMixin):
 
     def OnExitApp(self, evt):
         self.frame.Close(True)
-    #
 
 
     def OnCloseFrame(self, evt):
         if hasattr(self, "window") and hasattr(self.window, "ShutdownDemo"):
             self.window.ShutdownDemo()
-        #
         evt.Skip()
-    #
 
     def OnWidgetInspector(self, evt):
         wx.lib.inspection.InspectionTool().Show()
-    #
-#
     
 
+#----------------------------------------------------------------------------
 
 
-if __name__ == "__main__":
+def main(argv):
+    useShell = False
+
+    name, ext  = os.path.splitext(argv[0])
     module = __import__(name)
-    app = RunDemoApp("Notebook", module, False)
+
+
+    app = RunDemoApp(name, module, useShell)
     app.MainLoop()
-#
+
 

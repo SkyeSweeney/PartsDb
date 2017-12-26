@@ -106,24 +106,10 @@ def runTest(frame, nb, log):
 #----------------------------------------------------------------------------
 
 
-overview = """\
-<html><body>
-<h2>wx.Notebook</h2>
-<p>
-This class represents a notebook control, which manages multiple
-windows with associated tabs.
-<p>
-To use the class, create a wx.Notebook object and call AddPage or
-InsertPage, passing a window to be used as the page. Do not explicitly
-delete the window for a page that is currently managed by wx.Notebook.
-
-"""
-
-
 if __name__ == '__main__':
     import sys,os
     import run
-    run.main(['', os.path.basename(sys.argv[0])] + sys.argv[1:])
+    run.main(['Notebook.py'])
 
 
 
