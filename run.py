@@ -40,7 +40,7 @@ class Log:
     write = WriteText
 
 
-class RunDemoApp(wx.App, wx.lib.mixins.inspection.InspectionMixin):
+class RunDemoApp(wx.App):
     def __init__(self, name, module, useShell):
         self.name = name
         self.demoModule = module
@@ -52,7 +52,6 @@ class RunDemoApp(wx.App, wx.lib.mixins.inspection.InspectionMixin):
         wx.Log.SetActiveTarget(wx.LogStderr())
 
         self.SetAssertMode(assertMode)
-        self.InitInspection()  # for the InspectionMixin base class
 
         frame = wx.Frame(None, -1, "RunDemo: " + self.name, pos=(50,50), size=(200,100),
                         style=wx.DEFAULT_FRAME_STYLE, name="run a sample")
@@ -60,8 +59,7 @@ class RunDemoApp(wx.App, wx.lib.mixins.inspection.InspectionMixin):
 
         menuBar = wx.MenuBar()
         menu = wx.Menu()
-        item = menu.Append(-1, "&Widget Inspector\tF6", "Show the wxPython Widget Inspection Tool")
-        self.Bind(wx.EVT_MENU, self.OnWidgetInspector, item)
+
         item = menu.Append(wx.ID_EXIT, "E&xit\tCtrl-Q", "Exit demo")
         self.Bind(wx.EVT_MENU, self.OnExitApp, item)
         menuBar.Append(menu, "&File")
@@ -126,8 +124,6 @@ class RunDemoApp(wx.App, wx.lib.mixins.inspection.InspectionMixin):
             self.window.ShutdownDemo()
         evt.Skip()
 
-    def OnWidgetInspector(self, evt):
-        wx.lib.inspection.InspectionTool().Show()
     
 
 #----------------------------------------------------------------------------

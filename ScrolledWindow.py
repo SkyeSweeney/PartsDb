@@ -1,6 +1,5 @@
 
 import  wx
-import  images
 
 # There are two different approaches to drawing, buffered or direct.
 # This sample shows both approaches so you can easily compare and
@@ -22,10 +21,6 @@ class MyCanvas(wx.ScrolledWindow):
 
         self.SetBackgroundColour("WHITE")
         self.SetCursor(wx.StockCursor(wx.CURSOR_PENCIL))
-        bmp = images.Test2.GetBitmap()
-        mask = wx.Mask(bmp, wx.BLUE)
-        bmp.SetMask(mask)
-        self.bmp = bmp
 
         self.SetVirtualSize((self.maxWidth, self.maxHeight))
         self.SetScrollRate(20,20)
@@ -92,7 +87,6 @@ class MyCanvas(wx.ScrolledWindow):
         dc.SetPen(wx.GREEN_PEN)
         dc.DrawSpline(lst+[(100,100)])
 
-        dc.DrawBitmap(self.bmp, 200, 20, True)
         dc.SetTextForeground(wx.Colour(0, 0xFF, 0x80))
         dc.DrawText("a bitmap", 200, 85)
 

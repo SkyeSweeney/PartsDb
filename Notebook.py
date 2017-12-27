@@ -5,9 +5,7 @@ import  wx
 
 import  ColorPanel
 import  GridSimple
-import  ListCtrl
 import  ScrolledWindow
-import  images
 
 #----------------------------------------------------------------------------
 
@@ -34,15 +32,6 @@ class TestNB(wx.Notebook):
         st.SetForegroundColour(wx.WHITE)
         st.SetBackgroundColour(wx.BLUE)
 
-        # Show how to put an image on one of the notebook tabs,
-        # first make the image list:
-        il = wx.ImageList(16, 16)
-        idx1 = il.Add(images.Smiles.GetBitmap())
-        self.AssignImageList(il)
-
-        # now put an image on the first tab we just created:
-        self.SetPageImage(0, idx1)
-
 
         win = self.makeColorPanel(wx.RED)
         self.AddPage(win, "Red")
@@ -50,23 +39,9 @@ class TestNB(wx.Notebook):
         win = ScrolledWindow.MyCanvas(self)
         self.AddPage(win, 'ScrolledWindow')
 
-        win = self.makeColorPanel(wx.GREEN)
-        self.AddPage(win, "Green")
-
         win = GridSimple.SimpleGrid(self, log)
         self.AddPage(win, "Grid")
 
-        win = ListCtrl.TestListCtrlPanel(self, log)
-        self.AddPage(win, 'List')
-
-        win = self.makeColorPanel(wx.CYAN)
-        self.AddPage(win, "Cyan")
-
-        win = self.makeColorPanel(wx.NamedColour('Midnight Blue'))
-        self.AddPage(win, "Midnight Blue")
-
-        win = self.makeColorPanel(wx.NamedColour('Indian Red'))
-        self.AddPage(win, "Indian Red")
 
         self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.OnPageChanged)
         self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGING, self.OnPageChanging)
