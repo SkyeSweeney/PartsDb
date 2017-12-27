@@ -5,21 +5,14 @@ import os
 import time
 import Part
 
-#######################################################################
-# Create and set a help provider.  Normally you would do this in
-# the app's OnInit as it must be done before any SetHelpText calls.
-#######################################################################
-provider = wx.SimpleHelpProvider()
-wx.HelpProvider.Set(provider)
-
 
 #######################################################################
-#
+# Creates a Parts Tab
 #######################################################################
-class PartsDialog(wx.Dialog):
+class PartsTab(wx.Dialog):
 
     ###################################################################
-    #
+    # Constructor
     ###################################################################
     def __init__(
             self, 
@@ -50,24 +43,11 @@ class PartsDialog(wx.Dialog):
         sizer = wx.BoxSizer(wx.VERTICAL)
 
         self.text = []
-        self.text.append(self.AddEntry(sizer, "MyPartNum",     seed.MyPartNum))
-        self.text.append(self.AddEntry(sizer, "MyBarcode",     seed.MyBarcode))
-        self.text.append(self.AddEntry(sizer, "MyWebsite",     seed.MyWebsite))
-        self.text.append(self.AddEntry(sizer, "Vendor",        seed.Vendor))
-        self.text.append(self.AddEntry(sizer, "VendorPartNum", seed.VendorPartNum))
-        self.text.append(self.AddEntry(sizer, "VendorBarcode", seed.VendorBarcode))
-        self.text.append(self.AddEntry(sizer, "VendorWebsite", seed.VendorWebsite))
-        self.text.append(self.AddEntry(sizer, "Mfg",           seed.Mfg))
-        self.text.append(self.AddEntry(sizer, "MfgPartNum",    seed.MfgPartNum))
-        self.text.append(self.AddEntry(sizer, "MfgBarcode",    seed.MfgBarcode))
-        self.text.append(self.AddEntry(sizer, "MfgWebsite",    seed.MfgWebsite))
-        self.text.append(self.AddEntry(sizer, "Quantity",      seed.Quantity))
-        self.text.append(self.AddEntry(sizer, "Title",         seed.Title))
-        self.text.append(self.AddEntry(sizer, "Description",   seed.Description))
-        self.text.append(self.AddEntry(sizer, "Class",         seed.Class))
-        self.text.append(self.AddEntry(sizer, "Package",       seed.Package))
-        self.text.append(self.AddEntry(sizer, "Location",      seed.Location))
-        self.text.append(self.AddEntry(sizer, "Notes",         seed.Notes))
+
+        # Do for each field:
+        for fld in flds:
+            self.text.append(self.AddEntry(sizer, fld.name, seed.PartNum))
+        #
 
         # Seperator before buttons
         line = wx.StaticLine(self, -1, size=(20,-1), style=wx.LI_HORIZONTAL)

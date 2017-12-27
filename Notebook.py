@@ -1,59 +1,67 @@
-
+#######################################################################
+#
+#
+#
+#######################################################################
 
 import wx
 import os
 import Notebook
 import sys
 import ColorPanel
-import GridSimple
-import ScrolledWindow
+import MyGrid
+import Parts
+import Part
+import FilterTab
 
 assertMode = wx.PYAPP_ASSERT_DIALOG
 
 
 #######################################################################
-#
+# Main class for the notebook
 #######################################################################
-class TestNB(wx.Notebook):
+class MyNotebook(wx.Notebook):
 
     ###################################################################
-    #
+    # Constructor
     ###################################################################
     def __init__(self, parent, id, log):
-        wx.Notebook.__init__(self, parent, id, size=(21,21), style=
-                             wx.BK_DEFAULT
-                             #wx.BK_TOP 
-                             #wx.BK_BOTTOM
-                             #wx.BK_LEFT
-                             #wx.BK_RIGHT
-                             # | wx.NB_MULTILINE
-                             )
+
+        # Create the notebook
+        wx.Notebook.__init__(self, 
+                             parent, 
+                             id, 
+                             size=(21,21), 
+                             style=wx.BK_DEFAULT)
+        # Save logger
         self.log = log
 
-        win = self.makeColorPanel(wx.BLUE)
-        self.AddPage(win, "Blue")
+        # Open database
+        self.db = Parts.Parts()
+        self.db.OpenDataBase()
 
-        st = wx.StaticText(win.win, -1,
-                          "You can put nearly any type of window here,\n"
-                          "and if the platform supports it then the\n"
-                          "tabs can be on any side of the notebook.",
-                          (10, 10))
+        # Make the Parts tab
+        self.partsTab = MyGrid.MyGrid(self, self.db, log)
+        self.AddPage(self.partsTab, "Parts")
 
-        st.SetForegroundColour(wx.WHITE)
-        st.SetBackgroundColour(wx.BLUE)
+        # Make the Filter tab
+        self.filterTab = self.makeColorPanel(wx.BLUE)
+        self.AddPage(self.filterTab, "Filter")
 
+        # Make the Search tab
+        self.searchTab = self.makeColorPanel(wx.RED)
+        self.AddPage(self.searchTab, "Search")
 
-        win = self.makeColorPanel(wx.RED)
-        self.AddPage(win, "Red")
+        # Make the Category tab
+        self.categoryTab = self.makeColorPanel(wx.RED)
+        self.AddPage(self.categoryTab, "Category")
 
-        win = ScrolledWindow.MyCanvas(self)
-        self.AddPage(win, 'ScrolledWindow')
+        # Make the Project tab
+        self.projectTab = self.makeColorPanel(wx.RED)
+        self.AddPage(self.projectTab, "Projects")
 
-        win = GridSimple.SimpleGrid(self, log)
-        self.AddPage(win, "Grid")
-
-
-        self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.OnPageChanged)
+        # Bind to tab changing routines
+        self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED,  self.OnPageChanged)
         self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGING, self.OnPageChanging)
     #
 
@@ -75,7 +83,7 @@ class TestNB(wx.Notebook):
 
 
     ###################################################################
-    #
+    # This gets called when the new tab is activated
     ###################################################################
     def OnPageChanged(self, event):
         old = event.GetOldSelection()
@@ -86,7 +94,7 @@ class TestNB(wx.Notebook):
     #
 
     ###################################################################
-    #
+    # This gets called when a new tab is selected but has yet to be changed
     ###################################################################
     def OnPageChanging(self, event):
         old = event.GetOldSelection()
@@ -95,15 +103,16 @@ class TestNB(wx.Notebook):
         self.log.write('OnPageChanging, old:%d, new:%d, sel:%d\n' % (old, new, sel))
         event.Skip()
     #
+#
 
 
 #######################################################################
-#
+# Logger class
 #######################################################################
 class Log:
 
     ###################################################################
-    #
+    # Write text to logger
     ###################################################################
     def WriteText(self, text):
         if text[-1:] == '\n':
@@ -114,88 +123,224 @@ class Log:
 
 
     write = WriteText
-
-
-
-#######################################################################
 #
+
+
+
 #######################################################################
-class RunDemoApp(wx.App):
+# This is the top level class for the application
+#######################################################################
+class TopWindow(wx.App):
+
+    ID_VIEW_FILTER  = 3001
+    ID_VIEW_GROUP   = 3002
+    ID_VIEW_SEARCH  = 3003
+   
 
     ###################################################################
-    #
+    # Constructor
     ###################################################################
     def __init__(self):
-        wx.App.__init__(self, redirect=False)
+        wx.App.__init__(self)
+
+        self.filt = Part.Part()
+        self.filt.setAll("*")
     #
 
 
     ###################################################################
-    #
+    # Called on WX initialization
     ###################################################################
     def OnInit(self):
-        wx.Log.SetActiveTarget(wx.LogStderr())
 
+        # Create logger
+        wx.Log.SetActiveTarget(wx.LogStderr())
+        log = Log()
+
+        # Set asseriton mode
         self.SetAssertMode(assertMode)
 
-        frame = wx.Frame(None, 
-                         -1, 
-                         "Notebook", 
-                         pos=(50,50), 
-                         size=(200,100),
-                         style=wx.DEFAULT_FRAME_STYLE, 
-                         name="Notebook1")
-        self.frame = frame
-        frame.CreateStatusBar()
+        # Create a top level frame
+        self.frame = wx.Frame(None, 
+                              -1, 
+                              "Notebook", 
+                              pos=(50,50), 
+                              size=(200,100),
+                              style=wx.DEFAULT_FRAME_STYLE, 
+                              name="Notebook1")
 
-        menuBar = wx.MenuBar()
-        menu = wx.Menu()
+        # Create Menu Bar
+        self.CreateMenuBar()
 
-        item = menu.Append(wx.ID_EXIT, "E&xit\tCtrl-Q", "Exit demo")
-        self.Bind(wx.EVT_MENU, self.OnExitApp, item)
-        menuBar.Append(menu, "&File")
+        # Create Status Bar
+        self.CreateTools()
 
-        frame.SetMenuBar(menuBar)
-        frame.Show(True)
-        frame.Bind(wx.EVT_CLOSE, self.OnCloseFrame)
+        # Create Status Bar
+        self.CreateStatusBar()
 
-        log = Log()
-        win = Notebook.TestNB(frame, -1, log)
-        self.window = win
+        # Show the frame
+        self.frame.Show(True)
+
+        # Bind to the CloseFrame routine
+        self.frame.Bind(wx.EVT_CLOSE, self.OnCloseFrame)
+
+        # Create a notebook within this frame
+        self.NotebookWin = Notebook.MyNotebook(self.frame, -1, log)
 
         # Set the frame to a good size for showing stuff
-        frame.SetSize((640, 480))
-        win.SetFocus()
-        frect = frame.GetRect()
+        self.frame.SetSize((640, 480))
 
-        self.SetTopWindow(frame)
+        # Set the focus to the Notebook
+        self.NotebookWin.SetFocus()
+
+        # Set this to be the top Z frame
+        self.SetTopWindow(self.frame)
                     
         return True
     #
 
     ###################################################################
+    # Create MenuBar in top frame
+    ###################################################################
+    def CreateMenuBar(self):
+
+        # Create the "File" menu
+        fileMenu = wx.Menu()
+
+        fileMenu.Append(wx.ID_OPEN,   "Open",    "Open a parts database")
+        fileMenu.Append(wx.ID_CLOSE,  "Close",   "Close a parts database")
+        fileMenu.Append(wx.ID_SAVE,   "Save",    "Save current parts database")
+        fileMenu.Append(wx.ID_SAVEAS, "Save as", "Save current parts database as a new file")
+        fileMenu.Append(wx.ID_EXIT,   "Exit",    "Exit without saving")
+
+        # Bind the menu event to an event handler
+        self.Bind(wx.EVT_MENU, self.OnFileOpen,   id=wx.ID_OPEN)
+        self.Bind(wx.EVT_MENU, self.OnFileClose,  id=wx.ID_CLOSE)
+        self.Bind(wx.EVT_MENU, self.OnFileSave,   id=wx.ID_SAVE)
+        self.Bind(wx.EVT_MENU, self.OnFileSaveAs, id=wx.ID_SAVEAS)
+        self.Bind(wx.EVT_MENU, self.OnFileExit,   id=wx.ID_EXIT)
+
+        # Create the menubar
+        menuBar = wx.MenuBar()
+
+        # And put the menu on the menubar
+        menuBar.Append(fileMenu, "&File")
+
+        # And put the menu on the frame
+        self.frame.SetMenuBar(menuBar)
+
     #
+
+    ###################################################################
+    # Create toolbar
+    ###################################################################
+    def CreateTools(self):    
+
+        # Create toolbar under the main frame
+        toolbar = self.frame.CreateToolBar()
+
+        # Get some art work for buttons
+        art_quit      = wx.ArtProvider.GetBitmap(wx.ART_QUIT, 
+                                                 client=wx.ART_TOOLBAR)
+        art_file_open = wx.ArtProvider.GetBitmap(wx.ART_FILE_OPEN, 
+                                                 client=wx.ART_TOOLBAR)
+
+        # Add artwork to tool bar
+        toolOpen   = toolbar.AddLabelTool(wx.ID_ANY, 'Open',   art_file_open)
+        toolQuit   = toolbar.AddLabelTool(wx.ID_ANY, 'Quit',   art_quit)
+
+        # Draw the toolbar
+        toolbar.Realize()
+
+        # Bind methods to buttons
+        self.Bind(wx.EVT_TOOL, self.OnFileExit,       toolQuit)
+        self.Bind(wx.EVT_TOOL, self.OnFileOpen,       toolOpen)
+        
+    #
+
+    ###################################################################
+    # Create a status bar in top frame
+    ###################################################################
+    def CreateStatusBar(self):    
+        # Create a status bar in the frame
+        self.frame.CreateStatusBar()
+    #
+
+    ###################################################################
+    # Called when application exits
     ###################################################################
     def OnExitApp(self, evt):
+        print "OnExitApp"
         self.frame.Close(True)
     #
 
 
     ###################################################################
-    #
+    # Called when frame is closed
     ###################################################################
     def OnCloseFrame(self, evt):
-        if hasattr(self, "window") and hasattr(self.window, "ShutdownDemo"):
-            self.window.ShutdownDemo()
-        #
+        print "OnCloseFrame"
         evt.Skip()
     #
+
+
+    ###################################################################
+    # Called to close a database file
+    ###################################################################
+    def OnFileExit(self, evt):
+        print "OnFileExit"
+        evt.Skip()
+    #
+
+
+    ###################################################################
+    # Called when frame is closed
+    ###################################################################
+    def OnFileOpen(self, evt):
+        print "OnFileOPen"
+        evt.Skip()
+    #
+
+
+    ###################################################################
+    # 
+    ###################################################################
+    def OnFileClose(self, evt):
+        print "OnFileClose"
+        evt.Skip()
+    #
+
+
+    ###################################################################
+    # 
+    ###################################################################
+    def OnFileSave(self, evt):
+        print "OnFileSave"
+        evt.Skip()
+    #
+
+
+    ###################################################################
+    # 
+    ###################################################################
+    def OnFileSaveAs(self, evt):
+        print "OnFileSaveAs"
+        evt.Skip()
+    #
+
+
 #
 
     
 
-#----------------------------------------------------------------------------
+#######################################################################
+# This is the main entry point
+#######################################################################
 if __name__ == '__main__':
-    app = RunDemoApp()
+
+    # Create the application
+    app = TopWindow()
+
+    # Now run the application's main loop till exit
     app.MainLoop()
 #
