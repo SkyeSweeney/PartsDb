@@ -23,19 +23,19 @@ class FilterTab(wx.Window):
         # contents
         vSizer = wx.BoxSizer(wx.VERTICAL)
 
-
-        hSizer = wx.BoxSizer(wx.HORIZONTAL)
-
-        labelObj = wx.StaticText(self, -1, "title")
-        hSizer.Add(labelObj, 1, flag=wx.ALIGN_CENTRE|wx.ALL, border=5)
-
-        textObj = wx.TextCtrl(self, -1, "text")
-        hSizer.Add(textObj, 1, flag=wx.ALIGN_CENTRE|wx.ALL, border=5)
-
-        vSizer.Add(hSizer, 
-                  1, 
-                  flag=wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 
-                  border=5)
+        self.AddEntry(vSizer, "title1", "text")
+        self.AddEntry(vSizer, "title2", "text")
+        self.AddEntry(vSizer, "title3", "text")
+        self.AddEntry(vSizer, "title3", "text")
+        self.AddEntry(vSizer, "title3", "text")
+        self.AddEntry(vSizer, "title3", "text")
+        self.AddEntry(vSizer, "title3", "text")
+        self.AddEntry(vSizer, "title3", "text")
+        self.AddEntry(vSizer, "title3", "text")
+        self.AddEntry(vSizer, "title3", "text")
+        self.AddEntry(vSizer, "title3", "text")
+        self.AddEntry(vSizer, "title3", "text")
+        self.AddEntry(vSizer, "title3", "text")
 
 
         # Seperator before buttons
