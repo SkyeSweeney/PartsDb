@@ -45,7 +45,7 @@ class MyNotebook(wx.Notebook):
         self.AddPage(self.partsTab, "Parts")
 
         # Make the Filter tab
-        self.filterTab = self.makeColorPanel(wx.BLUE)
+        self.filterTab = FilterTab.FilterTab(self)
         self.AddPage(self.filterTab, "Filter")
 
         # Make the Search tab
