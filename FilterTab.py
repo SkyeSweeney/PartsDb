@@ -36,7 +36,7 @@ class FilterTab(wx.ScrolledWindow):
 
         i = 0
         for fld in flds:
-            self.AddEntry(vSizer, fld[1], self.filtVal.getValueByIndex(i))
+            self.AddEntry(vSizer, fld.HumanName, self.filtVal.getValueByIndex(i))
             i = i + 1
         #
 

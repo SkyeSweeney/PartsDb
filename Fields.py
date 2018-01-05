@@ -1,4 +1,5 @@
 
+import collections
 
 #######################################################################
 #
@@ -10,27 +11,31 @@ class Fields():
     ###################################################################
     def __init__(self):
 
+        # Create a named tuple type
+        PartFieldInfo = collections.namedtuple("PartFieldInfo", ["id", "SqlName", "HumanName", "SqlType", "Editable"])
+
+        # Create a list for each field
         self.fields = []
 
-        #                    id, fieldName        HumanName,     type
-        self.fields.append( (0,  "PartNo",        "Part #",         "INTEGER PRIMARY KEY") )
-        self.fields.append( (1,  "Barcode",       "Barcode",        "TEXT") )
-        self.fields.append( (2,  "Website",       "Website",        "TEXT") )
-        self.fields.append( (3,  "Mfg",           "Mfg",            "TEXT") )
-        self.fields.append( (4,  "MfgPartNo",     "Mfg Part #",     "TEXT") )
-        self.fields.append( (5,  "MfgBarcode",    "Mfg Barcode",    "TEXT") )
-        self.fields.append( (6,  "MfgWebsite",    "Mfg Website",    "TEXT") )
-        self.fields.append( (7,  "Vendor",        "Vendor",         "TEXT") )
-        self.fields.append( (8,  "VendorPartNo",  "Vendor Part #",  "TEXT") )
-        self.fields.append( (9,  "VendorBarcode", "Vendor Barcode", "TEXT") )
-        self.fields.append( (10, "VendorWebsite", "Vendor Website", "TEXT") )
-        self.fields.append( (11, "Quantity",      "Quantity",       "TEXT") )
-        self.fields.append( (12, "Title",         "Title",          "TEXT") )
-        self.fields.append( (13, "Description",   "Description",    "TEXT") )
-        self.fields.append( (14, "Catagory",      "Catagory",       "TEXT") )
-        self.fields.append( (15, "Package",       "Package",        "TEXT") )
-        self.fields.append( (16, "Location",      "Location",       "TEXT") )
-        self.fields.append( (17, "Notes",         "Notes",          "TEXT") )
+        #                                 id, fieldName        HumanName,        type                   editable
+        self.fields.append( PartFieldInfo(0,  "PartNo",        "Part #",         "INTEGER PRIMARY KEY", False) )
+        self.fields.append( PartFieldInfo(1,  "Barcode",       "Barcode",        "TEXT",                False) )
+        self.fields.append( PartFieldInfo(2,  "Website",       "Website",        "TEXT",                True) )
+        self.fields.append( PartFieldInfo(3,  "Mfg",           "Mfg",            "TEXT",                True) )
+        self.fields.append( PartFieldInfo(4,  "MfgPartNo",     "Mfg Part #",     "TEXT",                True) )
+        self.fields.append( PartFieldInfo(5,  "MfgBarcode",    "Mfg Barcode",    "TEXT",                True) )
+        self.fields.append( PartFieldInfo(6,  "MfgWebsite",    "Mfg Website",    "TEXT",                True) )
+        self.fields.append( PartFieldInfo(7,  "Vendor",        "Vendor",         "TEXT",                True) )
+        self.fields.append( PartFieldInfo(8,  "VendorPartNo",  "Vendor Part #",  "TEXT",                True) )
+        self.fields.append( PartFieldInfo(9,  "VendorBarcode", "Vendor Barcode", "TEXT",                True) )
+        self.fields.append( PartFieldInfo(10, "VendorWebsite", "Vendor Website", "TEXT",                True) )
+        self.fields.append( PartFieldInfo(11, "Quantity",      "Quantity",       "TEXT",                True) )
+        self.fields.append( PartFieldInfo(12, "Title",         "Title",          "TEXT",                True) )
+        self.fields.append( PartFieldInfo(13, "Description",   "Description",    "TEXT",                True) )
+        self.fields.append( PartFieldInfo(14, "Catagory",      "Catagory",       "TEXT",                True) )
+        self.fields.append( PartFieldInfo(15, "Package",       "Package",        "TEXT",                True) )
+        self.fields.append( PartFieldInfo(16, "Location",      "Location",       "TEXT",                True) )
+        self.fields.append( PartFieldInfo(17, "Notes",         "Notes",          "TEXT",                True) )
     #
 
 
@@ -55,11 +60,11 @@ class Fields():
     ###################################################################
     def exists(self, fld):
         for field in self.fields:
-            if (fld == field[1]):
-                return field
+            if (fld == field.SqlName) or (fld == field.HumanName):
+                return True
             #
         #
-        return None
+        return False
     #
 #
 
@@ -73,5 +78,6 @@ if __name__ == '__main__':
     print f.getFields()
     print f.exists("aaa")
     print f.exists("Part #")
+    print f.exists("PartNo")
 
 
