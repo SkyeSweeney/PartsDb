@@ -10,7 +10,7 @@ import Notebook
 import sys
 import ColorPanel
 import MyGrid
-import Parts
+import Database
 import Part
 import FilterTab
 
@@ -37,7 +37,7 @@ class MyNotebook(wx.Notebook):
         self.log = log
 
         # Open database
-        self.db = Parts.Parts()
+        self.db = Database.Database()
         self.db.OpenDataBase()
 
         # Make the Parts tab
@@ -67,7 +67,7 @@ class MyNotebook(wx.Notebook):
 
 
     ###################################################################
-    #
+    # Used for dummy tabs
     ###################################################################
     def makeColorPanel(self, color):
         p = wx.Panel(self, -1)
@@ -142,9 +142,6 @@ class TopWindow(wx.App):
     ###################################################################
     def __init__(self):
         wx.App.__init__(self)
-
-        self.filt = Part.Part()
-        self.filt.setAll("*")
     #
 
 

@@ -1,4 +1,3 @@
-
 import doctest
 import time
 import Fields
@@ -141,3 +140,4 @@ if __name__ == "__main__":
     p.setFromList(l)
     print p
     print p.getValueByIndex(1)
+

@@ -9,96 +9,44 @@ import Part
 #######################################################################
 # Creates a Parts Tab
 #######################################################################
-class FilterTab(wx.Window):
+class FilterTab(wx.ScrolledWindow):
 
     ###################################################################
     # Constructor
     ###################################################################
     def __init__(self, parent):
 
-        wx.Window.__init__(self, parent, -1)
-        self.SetBackgroundColour(wx.GREEN)
+        wx.ScrolledWindow.__init__(self, parent, -1, size=wx.DefaultSize)
+        self.SetVirtualSize( (1000,1000) )
+        self.SetScrollRate(20,20)
 
-        # Now continue with the normal construction of the dialog
-        # contents
+        self.parent = parent
+        self.db = self.parent.db
+        self.fields = self.db.fields
+
+        # Create vertical sizer for fields
         vSizer = wx.BoxSizer(wx.VERTICAL)
 
-        self.AddEntry(vSizer, "title1", "text")
-        self.AddEntry(vSizer, "title2", "text")
-        self.AddEntry(vSizer, "title3", "text")
-        self.AddEntry(vSizer, "title3", "text")
-        self.AddEntry(vSizer, "title3", "text")
-        self.AddEntry(vSizer, "title3", "text")
-        self.AddEntry(vSizer, "title3", "text")
-        self.AddEntry(vSizer, "title3", "text")
-        self.AddEntry(vSizer, "title3", "text")
-        self.AddEntry(vSizer, "title3", "text")
-        self.AddEntry(vSizer, "title3", "text")
-        self.AddEntry(vSizer, "title3", "text")
-        self.AddEntry(vSizer, "title3", "text")
+        # Create and polulate the initial filter
+        self.filtVal = Part.Part()
+        self.filtVal.setAll("*")
 
+        # For each field in the list
+        flds = self.fields.getFields()
 
-        # Seperator before buttons
-        #line = wx.StaticLine(self, -1, size=(20,-1), style=wx.LI_HORIZONTAL)
-        #sizer.Add(line, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.RIGHT|wx.TOP, 5)
+        i = 0
+        for fld in flds:
+            self.AddEntry(vSizer, fld[1], self.filtVal.getValueByIndex(i))
+            i = i + 1
+        #
 
-        # Sizer for button row
-        #btnsizer = wx.StdDialogButtonSizer()
-        
-        # OK button
-        #ok_btn = wx.Button(self, wx.ID_OK)
-        #ok_btn.SetDefault()
-        #btnsizer.AddButton(ok_btn)
-        #ok_btn.Bind(wx.EVT_BUTTON, self.OnOK)
-
-        # Cancel button
-        #cancel_btn = wx.Button(self, wx.ID_CANCEL)
-        #btnsizer.AddButton(cancel_btn)
-        #cancel_btn.Bind(wx.EVT_BUTTON, self.OnCancel)
-
-        #btnsizer.Realize()
-
-        # Add buttons to dialog
-        #sizer.Add(btnsizer, 0, wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
-
-        # Make dialog
+        # Add sizer to window
         self.SetSizer(vSizer)
         vSizer.Fit(self)
     #
 
-
     ###################################################################
-    #
-    ###################################################################
-    def OnOK(self, evt):
-        strings = []
-        for i in self.text:
-            strings.append(i.GetValue())
-        #
-        self.retval = Part.Part()
-        self.retval.createFromList(strings)
-        self.EndModal(wx.ID_OK)
-    #
-
-
-    ###################################################################
-    #
-    ###################################################################
-    def OnCancel(self, evt):
-        self.EndModal(wx.ID_CANCEL)
-    #
-
-
-    ###################################################################
-    #
-    ###################################################################
-    def GetValue(self):
-        return self.retval
-    #
-
-
-    ###################################################################
-    #
+    # Helper routine to create a single line 
     ###################################################################
     def AddEntry(self, sizer, title, text):
 
@@ -110,9 +58,11 @@ class FilterTab(wx.Window):
         textObj = wx.TextCtrl(self, -1, text)
         box.Add(textObj, 1, flag=wx.ALIGN_CENTRE|wx.ALL, border=5)
 
-        sizer.Add(box, 1, flag=wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, border=5)
+        sizer.Add(box, 
+                  1, 
+                  flag=wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 
+                  border=1)
 
-        return textObj
     #
 #
 

@@ -1,10 +1,11 @@
 
-import  wx
-import  wx.grid  as  gridlib
-import  time
-import  sys
-import  Part
-import  Fields
+import wx
+import wx.grid  as  gridlib
+import time
+import sys
+import Part
+import Fields
+import types
 
 #######################################################################
 #
@@ -43,12 +44,10 @@ class MyGrid(gridlib.Grid):
 
         # For each item in the database
         rows = self.db.GetAllRecords()
+        iRow = 0
         for row in rows:
-            print row
-
-        # Add data to grid
-        part = Part.Part()
-        self.AppendRecord(part)
+            self.AppendRecord(row)
+        #
 
 
         #self.SetCellFont(0, 0, wx.Font(12, wx.ROMAN, wx.ITALIC, wx.NORMAL))
@@ -124,15 +123,21 @@ class MyGrid(gridlib.Grid):
     #
 
     ###################################################################
-    #
+    # Add a new reconrd to the end 
     ###################################################################
-    def AppendRecord(self, part):
+    def AppendRecord(self, row):
         self.AppendRows(1)
         i = self.GetNumberRows() - 1
         j = 0
-        for j in range(18):
-            self.SetCellValue(i, j,  part.getValueByIndex(j))
+        n = len(row)
+        for j in range(n):
+            if (type(row[j]) is types.IntType):
+                self.SetCellValue(i, j,  str(row[j]))
+            else:
+                self.SetCellValue(i, j,  row[j])
+            #
         #
+    #
 
 
     ###################################################################
@@ -142,6 +147,7 @@ class MyGrid(gridlib.Grid):
         sys.stdout.write("OnCellLeftClick: (%d,%d) %s\n" %
                        (evt.GetRow(), evt.GetCol(), evt.GetPosition()))
         evt.Skip()
+    #
 
     ###################################################################
     #
@@ -150,6 +156,7 @@ class MyGrid(gridlib.Grid):
         sys.stdout.write("OnCellRightClick: (%d,%d) %s\n" %
                        (evt.GetRow(), evt.GetCol(), evt.GetPosition()))
         evt.Skip()
+    #
 
     ###################################################################
     #
@@ -158,6 +165,7 @@ class MyGrid(gridlib.Grid):
         sys.stdout.write("OnCellLeftDClick: (%d,%d) %s\n" %
                        (evt.GetRow(), evt.GetCol(), evt.GetPosition()))
         evt.Skip()
+    #
 
     ###################################################################
     #
@@ -166,6 +174,7 @@ class MyGrid(gridlib.Grid):
         sys.stdout.write("OnCellRightDClick: (%d,%d) %s\n" %
                        (evt.GetRow(), evt.GetCol(), evt.GetPosition()))
         evt.Skip()
+    #
 
     ###################################################################
     #
@@ -174,6 +183,7 @@ class MyGrid(gridlib.Grid):
         sys.stdout.write("OnLabelLeftClick: (%d,%d) %s\n" %
                        (evt.GetRow(), evt.GetCol(), evt.GetPosition()))
         evt.Skip()
+    #
 
     ###################################################################
     #
@@ -182,6 +192,7 @@ class MyGrid(gridlib.Grid):
         sys.stdout.write("OnLabelRightClick: (%d,%d) %s\n" %
                        (evt.GetRow(), evt.GetCol(), evt.GetPosition()))
         evt.Skip()
+    #
 
     ###################################################################
     #
@@ -190,6 +201,7 @@ class MyGrid(gridlib.Grid):
         sys.stdout.write("OnLabelLeftDClick: (%d,%d) %s\n" %
                        (evt.GetRow(), evt.GetCol(), evt.GetPosition()))
         evt.Skip()
+    #
 
     ###################################################################
     #
@@ -198,6 +210,7 @@ class MyGrid(gridlib.Grid):
         sys.stdout.write("OnLabelRightDClick: (%d,%d) %s\n" %
                        (evt.GetRow(), evt.GetCol(), evt.GetPosition()))
         evt.Skip()
+    #
 
     ###################################################################
     #
@@ -206,6 +219,7 @@ class MyGrid(gridlib.Grid):
         sys.stdout.write("OnRowSize: row %d, %s\n" %
                        (evt.GetRowOrCol(), evt.GetPosition()))
         evt.Skip()
+    #
 
     ###################################################################
     #
@@ -214,6 +228,7 @@ class MyGrid(gridlib.Grid):
         sys.stdout.write("OnColSize: col %d, %s\n" %
                        (evt.GetRowOrCol(), evt.GetPosition()))
         evt.Skip()
+    #
 
     ###################################################################
     #
@@ -223,9 +238,11 @@ class MyGrid(gridlib.Grid):
             msg = 'Selected'
         else:
             msg = 'Deselected'
+        #
         sys.stdout.write("OnRangeSelect: %s  top-left %s, bottom-right %s\n" %
                            (msg, evt.GetTopLeftCoords(), evt.GetBottomRightCoords()))
         evt.Skip()
+    #
 
 
     ###################################################################
@@ -243,6 +260,8 @@ class MyGrid(gridlib.Grid):
 
         if value == 'no good':
             self.moveTo = evt.GetRow(), evt.GetCol()
+        #
+    #
 
 
     ###################################################################
@@ -252,8 +271,10 @@ class MyGrid(gridlib.Grid):
         if self.moveTo != None:
             self.SetGridCursor(self.moveTo[0], self.moveTo[1])
             self.moveTo = None
+        #
 
         evt.Skip()
+    #
 
 
     ###################################################################
@@ -264,6 +285,7 @@ class MyGrid(gridlib.Grid):
             msg = 'Selected'
         else:
             msg = 'Deselected'
+        #
         sys.stdout.write("OnSelectCell: %s (%d,%d) %s\n" %
                        (msg, evt.GetRow(), evt.GetCol(), evt.GetPosition()))
 
@@ -274,13 +296,16 @@ class MyGrid(gridlib.Grid):
         if self.IsCellEditControlEnabled():
             self.HideCellEditControl()
             self.DisableCellEditControl()
+        #
 
         value = self.GetCellValue(row, col)
 
         if value == 'no good 2':
             return  # cancels the cell selection
+        #
 
         evt.Skip()
+    #
 
 
     ###################################################################
@@ -292,10 +317,12 @@ class MyGrid(gridlib.Grid):
                         "Checking", wx.YES_NO) == wx.NO:
             evt.Veto()
             return
+        #
 
         sys.stdout.write("OnEditorShown: (%d,%d) %s\n" %
                        (evt.GetRow(), evt.GetCol(), evt.GetPosition()))
         evt.Skip()
+    #
 
 
     ###################################################################
@@ -311,6 +338,7 @@ class MyGrid(gridlib.Grid):
         sys.stdout.write("OnEditorHidden: (%d,%d) %s\n" %
                        (evt.GetRow(), evt.GetCol(), evt.GetPosition()))
         evt.Skip()
+    #
 
 
     ###################################################################
