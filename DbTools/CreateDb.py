@@ -5,7 +5,7 @@ import sqlite3
 import doctest
 import time
 import Part
-import Parts
+import Database
 import os
 import Fields
 
@@ -22,7 +22,7 @@ if __name__ == "__main__":
         pass
 
     # Open the database
-    db = Parts.Parts()
+    db = Database.Database()
     db.OpenDataBase()  
 
     # Create a blank part
@@ -31,32 +31,26 @@ if __name__ == "__main__":
     # Start a transaction
     db.StartTransaction()
 
-    # for each field in part
-    for i in range(part.getNumFields()):
+    # add a few sample records
+    for iRow in range(10):
 
-        t = part.getFields(i)[3]   # Type
-        n = part.getFields(i)[1]   # Sql Name
+        # for each field in part
+        for iCol in range(part.getNumFields()):
 
-        if ("TEXT" in t):
-            part.setValueByIndex(i, "F-%s-%d"%(n,i))
-        elif ("INTEGER" in t):
-            part.setValueByIndex(i, i)
-        else:
-            pass
+            t = part.getFields(iCol)[3]   # Type
+            n = part.getFields(iCol)[1]   # Sql Name
+
+            if ("TEXT" in t):
+                part.setValueByIndex(iCol, "F-%s-%d"%(n,iRow))
+            elif ("INTEGER" in t):
+                part.setValueByIndex(iCol, iRow)
+            else:
+                pass
+            #
+
         #
-
+        db.AddRecord(part, commit=False)
     #
-
-    # Add the record
-    db.AddRecord(part, commit=False)
-    part.setValueByIndex(0, 1)
-    db.AddRecord(part, commit=False)
-    part.setValueByIndex(0, 2)
-    db.AddRecord(part, commit=False)
-    part.setValueByIndex(0, 3)
-    db.AddRecord(part, commit=False)
-    part.setValueByIndex(0, 4)
-    db.AddRecord(part, commit=False)
 
     db.EndTransaction()
 

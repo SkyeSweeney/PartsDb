@@ -246,7 +246,7 @@ class MyGrid(gridlib.Grid):
 
 
     ###################################################################
-    #
+    # Called when the user edits a cell
     ###################################################################
     def OnCellChange(self, evt):
         sys.stdout.write("OnCellChange: (%d,%d) %s\n" %
