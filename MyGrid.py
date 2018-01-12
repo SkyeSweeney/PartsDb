@@ -30,8 +30,9 @@ class MyGrid(gridlib.Grid):
         # Create Grid
         self.CreateGrid(0, n)  # Row, col
 
+        # Add the column headers
         for f in flds:
-            self.SetColLabelValue(f[0], f[1])
+            self.SetColLabelValue(f.id, f.HumanName)
         #
 
         # Column widths
@@ -48,6 +49,8 @@ class MyGrid(gridlib.Grid):
         for row in rows:
             self.AppendRecord(row)
         #
+
+        self.SetCellTextColour(1,1, wx.RED)
 
 
         #self.SetCellFont(0, 0, wx.Font(12, wx.ROMAN, wx.ITALIC, wx.NORMAL))
