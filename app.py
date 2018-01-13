@@ -1,129 +1,17 @@
 #######################################################################
 #
-#
+# This is the main Python module for the Parts Database application
 #
 #######################################################################
 
 import wx
 import os
-import Notebook
 import sys
-import ColorPanel
-import MyGrid
+import MyNotebook
 import Database
-import Part
-import FilterTab
+import Log
 
 assertMode = wx.PYAPP_ASSERT_DIALOG
-
-
-#######################################################################
-# Main class for the notebook
-#######################################################################
-class MyNotebook(wx.Notebook):
-
-    ###################################################################
-    # Constructor
-    ###################################################################
-    def __init__(self, parent, id, log):
-
-        # Create the notebook
-        wx.Notebook.__init__(self, 
-                             parent, 
-                             id, 
-                             size=(21,21), 
-                             style=wx.BK_DEFAULT)
-        # Save logger
-        self.log = log
-
-        # Open database
-        self.db = Database.Database()
-        self.db.OpenDataBase()
-
-        # Make the Parts tab
-        self.partsTab = MyGrid.MyGrid(self, self.db, log)
-        self.AddPage(self.partsTab, "Parts")
-
-        # Make the Filter tab
-        self.filterTab = FilterTab.FilterTab(self)
-        self.AddPage(self.filterTab, "Filter")
-
-        # Make the Search tab
-        self.searchTab = self.makeColorPanel(wx.RED)
-        self.AddPage(self.searchTab, "Search")
-
-        # Make the Category tab
-        self.categoryTab = self.makeColorPanel(wx.RED)
-        self.AddPage(self.categoryTab, "Category")
-
-        # Make the Project tab
-        self.projectTab = self.makeColorPanel(wx.RED)
-        self.AddPage(self.projectTab, "Projects")
-
-        # Bind to tab changing routines
-        self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED,  self.OnPageChanged)
-        self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGING, self.OnPageChanging)
-    #
-
-
-    ###################################################################
-    # Used for dummy tabs
-    ###################################################################
-    def makeColorPanel(self, color):
-        p = wx.Panel(self, -1)
-        win = ColorPanel.ColoredPanel(p, color)
-        p.win = win
-        def OnCPSize(evt, win=win):
-            win.SetPosition((0,0))
-            win.SetSize(evt.GetSize())
-        #
-        p.Bind(wx.EVT_SIZE, OnCPSize)
-        return p
-    #
-
-
-    ###################################################################
-    # This gets called when the new tab is activated
-    ###################################################################
-    def OnPageChanged(self, event):
-        old = event.GetOldSelection()
-        new = event.GetSelection()
-        sel = self.GetSelection()
-        self.log.write('OnPageChanged,  old:%d, new:%d, sel:%d\n' % (old, new, sel))
-        event.Skip()
-    #
-
-    ###################################################################
-    # This gets called when a new tab is selected but has yet to be changed
-    ###################################################################
-    def OnPageChanging(self, event):
-        old = event.GetOldSelection()
-        new = event.GetSelection()
-        sel = self.GetSelection()
-        self.log.write('OnPageChanging, old:%d, new:%d, sel:%d\n' % (old, new, sel))
-        event.Skip()
-    #
-#
-
-
-#######################################################################
-# Logger class
-#######################################################################
-class Log:
-
-    ###################################################################
-    # Write text to logger
-    ###################################################################
-    def WriteText(self, text):
-        if text[-1:] == '\n':
-            text = text[:-1]
-        #
-        wx.LogMessage(text)
-    #
-
-
-    write = WriteText
-#
 
 
 
@@ -141,7 +29,10 @@ class TopWindow(wx.App):
     # Constructor
     ###################################################################
     def __init__(self):
+
+        # Initialize the parent class
         wx.App.__init__(self)
+
     #
 
 
@@ -149,13 +40,20 @@ class TopWindow(wx.App):
     # Called on WX initialization
     ###################################################################
     def OnInit(self):
+        
+        # Create a database object
+        self.db = Database.Database()
 
-        # Create logger
+        # Set up WX logger to send to Standard Error
         wx.Log.SetActiveTarget(wx.LogStderr())
-        log = Log()
 
-        # Set asseriton mode
+        # Create a logger
+        self.log = Log.Log() 
+        print self.log
+
+        # Set assertion mode
         self.SetAssertMode(assertMode)
+
 
         # Create a top level frame
         self.frame = wx.Frame(None, 
@@ -182,7 +80,7 @@ class TopWindow(wx.App):
         self.frame.Bind(wx.EVT_CLOSE, self.OnCloseFrame)
 
         # Create a notebook within this frame
-        self.NotebookWin = Notebook.MyNotebook(self.frame, -1, log)
+        self.NotebookWin = MyNotebook.MyNotebook(self.frame, -1, self)
 
         # Set the frame to a good size for showing stuff
         self.frame.SetSize((640, 480))
@@ -328,16 +226,34 @@ class TopWindow(wx.App):
 
 #
 
-    
+
+
+
+#######################################################################
+# 
+#######################################################################
+def main():
+    global appObj
+
+    # Create the application
+    appObj = TopWindow()
+
+    # Now run the application's main loop till exit
+    appObj.MainLoop()
+#
+
+
+#######################################################################
+# 
+#######################################################################
+def getApp():
+    global appObj
+    return appObj
+#
 
 #######################################################################
 # This is the main entry point
 #######################################################################
 if __name__ == '__main__':
-
-    # Create the application
-    app = TopWindow()
-
-    # Now run the application's main loop till exit
-    app.MainLoop()
+    main()
 #

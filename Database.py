@@ -3,7 +3,6 @@ import sqlite3
 import doctest
 import time
 import Part
-import Fields
 
 
 
@@ -20,14 +19,13 @@ class Database():
         self.templatePart = Part.Part()
         self.numPartFields = self.templatePart.getNumFields()
         self.dbOpen = False
-        self.fields = Fields.Fields()
     #
   
   
     ###################################################################
     # Open the database file
     ###################################################################
-    def OpenDataBase(self):  
+    def OpenDataBase(self, name):  
 
         if (self.dbOpen):
             print "DB already open"
@@ -35,7 +33,7 @@ class Database():
         #
   
         # Connect the database
-        self.conn = sqlite3.connect('parts.db', isolation_level="EXCLUSIVE")
+        self.conn = sqlite3.connect(name, isolation_level="EXCLUSIVE")
   
         # Create the 'cursor' for access
         self.c = self.conn.cursor()
@@ -61,8 +59,9 @@ class Database():
         cmd = "CREATE TABLE PartsTbl("
 
         for i in range(self.numPartFields):
-            n = self.templatePart.getSqlFieldName(i)   # field name
-            t = self.templatePart.getFields(i)[3]      # field type
+            fld = self.templatePart.getFields(i)
+            n = fld.SqlName # field name
+            t = fld.SqlType # field type
             cmd = cmd + "%s %s," % (n, t)
         #
         cmd = cmd[:-1] + ")"
@@ -98,7 +97,7 @@ class Database():
     ###################################################################
     #
     ###################################################################
-    def GetAllRecords(self):
+    def GetAllParts(self):
         if (not self.dbOpen):
             print "DB is not open"
             return
@@ -119,7 +118,7 @@ class Database():
     ###################################################################
     #
     ###################################################################
-    def GetRecordBy(self, field, value):
+    def GetPartBy(self, field, value):
         if (not self.dbOpen):
             print "DB is not open"
             return
@@ -140,7 +139,7 @@ class Database():
     ###################################################################
     #
     ###################################################################
-    def AddRecord(self, part, commit=True):
+    def AddPart(self, part, commit=True):
         if (not self.dbOpen):
             print "DB is not open"
             return
@@ -160,7 +159,7 @@ class Database():
     ###################################################################
     #
     ###################################################################
-    def DelRecord(self, myPartNum, commit=True):
+    def DelPart(self, myPartNum, commit=True):
         if (not self.dbOpen):
             print "DB is not open"
             return
@@ -287,17 +286,17 @@ class Database():
     #
 
     ###################################################################
-    # 
+    # Get all a list of field info for all parts
     ###################################################################
-    def GetPartFields(self):  
-        return self.templatePart.getFields()
+    def GetPartAllFieldInfo(self):  
+        return self.templatePart.getAllFieldInfo()
     #
 
     ###################################################################
-    # 
+    # Get field info for a given field
     ###################################################################
     def GetPartFieldInfo(self, i):  
-        return self.templatePart.getFields(i)
+        return self.templatePart.getFieldInfo(i)
     #
   
 #

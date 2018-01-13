@@ -3,14 +3,13 @@ import wx
 import wx.grid  as  gridlib
 import time
 import sys
-import Part
-import Fields
 import types
+
 
 #######################################################################
 #
 #######################################################################
-class MyGrid(gridlib.Grid):
+class PartsTab(gridlib.Grid):
 
     ###################################################################
     #
@@ -23,8 +22,8 @@ class MyGrid(gridlib.Grid):
 
         self.moveTo = None
 
-        # Get list of all fields
-        flds = Fields.Fields().getFields()
+        # Get list of all field info
+        flds = self.db.GetPartAllFieldInfo()
         n = len(flds)
 
         # Create Grid
@@ -32,7 +31,7 @@ class MyGrid(gridlib.Grid):
 
         # Add the column headers
         for f in flds:
-            self.SetColLabelValue(f.id, f.HumanName)
+            self.SetColLabelValue(f.Id, f.HumanName)
         #
 
         # Column widths
@@ -44,7 +43,7 @@ class MyGrid(gridlib.Grid):
         self.SetColLabelAlignment(wx.ALIGN_LEFT, wx.ALIGN_BOTTOM)
 
         # For each item in the database
-        rows = self.db.GetAllRecords()
+        rows = self.db.GetAllParts()
         iRow = 0
         for row in rows:
             self.AppendRecord(row)
