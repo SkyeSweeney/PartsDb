@@ -5,6 +5,8 @@ import time
 import sys
 import types
 
+import PartsDlg
+
 
 #######################################################################
 #
@@ -47,10 +49,10 @@ class PartsTab(gridlib.Grid):
         iRow = 0
         for row in rows:
             self.AppendRecord(row)
+            for iCol in range(len(row)):
+                self.SetReadOnly(iRow, iCol, True)
+            iRow = iRow + 1
         #
-
-        self.SetCellTextColour(1,1, wx.RED)
-
 
         #self.SetCellFont(0, 0, wx.Font(12, wx.ROMAN, wx.ITALIC, wx.NORMAL))
 
@@ -101,25 +103,25 @@ class PartsTab(gridlib.Grid):
         # Register events
         self.Bind(wx.EVT_IDLE, self.OnIdle)
 
-        self.Bind(gridlib.EVT_GRID_CELL_LEFT_CLICK, self.OnCellLeftClick)
-        self.Bind(gridlib.EVT_GRID_CELL_RIGHT_CLICK, self.OnCellRightClick)
-        self.Bind(gridlib.EVT_GRID_CELL_LEFT_DCLICK, self.OnCellLeftDClick)
+        self.Bind(gridlib.EVT_GRID_CELL_LEFT_CLICK,   self.OnCellLeftClick)
+        self.Bind(gridlib.EVT_GRID_CELL_RIGHT_CLICK,  self.OnCellRightClick)
+        self.Bind(gridlib.EVT_GRID_CELL_LEFT_DCLICK,  self.OnCellLeftDClick)
         self.Bind(gridlib.EVT_GRID_CELL_RIGHT_DCLICK, self.OnCellRightDClick)
 
-        self.Bind(gridlib.EVT_GRID_LABEL_LEFT_CLICK, self.OnLabelLeftClick)
-        self.Bind(gridlib.EVT_GRID_LABEL_RIGHT_CLICK, self.OnLabelRightClick)
-        self.Bind(gridlib.EVT_GRID_LABEL_LEFT_DCLICK, self.OnLabelLeftDClick)
+        self.Bind(gridlib.EVT_GRID_LABEL_LEFT_CLICK,   self.OnLabelLeftClick)
+        self.Bind(gridlib.EVT_GRID_LABEL_RIGHT_CLICK,  self.OnLabelRightClick)
+        self.Bind(gridlib.EVT_GRID_LABEL_LEFT_DCLICK,  self.OnLabelLeftDClick)
         self.Bind(gridlib.EVT_GRID_LABEL_RIGHT_DCLICK, self.OnLabelRightDClick)
 
         self.Bind(gridlib.EVT_GRID_ROW_SIZE, self.OnRowSize)
         self.Bind(gridlib.EVT_GRID_COL_SIZE, self.OnColSize)
 
         self.Bind(gridlib.EVT_GRID_RANGE_SELECT, self.OnRangeSelect)
-        self.Bind(gridlib.EVT_GRID_CELL_CHANGE, self.OnCellChange)
-        self.Bind(gridlib.EVT_GRID_SELECT_CELL, self.OnSelectCell)
+        self.Bind(gridlib.EVT_GRID_CELL_CHANGE,  self.OnCellChange)
+        self.Bind(gridlib.EVT_GRID_SELECT_CELL,  self.OnSelectCell)
 
-        self.Bind(gridlib.EVT_GRID_EDITOR_SHOWN, self.OnEditorShown)
-        self.Bind(gridlib.EVT_GRID_EDITOR_HIDDEN, self.OnEditorHidden)
+        self.Bind(gridlib.EVT_GRID_EDITOR_SHOWN,   self.OnEditorShown)
+        self.Bind(gridlib.EVT_GRID_EDITOR_HIDDEN,  self.OnEditorHidden)
         self.Bind(gridlib.EVT_GRID_EDITOR_CREATED, self.OnEditorCreated)
 
     #
@@ -166,6 +168,33 @@ class PartsTab(gridlib.Grid):
     def OnCellLeftDClick(self, evt):
         sys.stdout.write("OnCellLeftDClick: (%d,%d) %s\n" %
                        (evt.GetRow(), evt.GetCol(), evt.GetPosition()))
+
+        # Get the part number from the grid
+        partNo = 3
+        
+        # Open the edit dialog
+        dlg = PartsDlg.PartsDlg(self, -1, "Edit", partNo, self.db)
+        dlg.CenterOnScreen()
+
+        # Display dialog and wait for OK or Cancel
+        val = dlg.ShowModal()
+
+        # If user wants to accept the new data
+        if (val == wx.ID_OK):
+
+            # Get the new part data from the dialog
+            newPart = dlg.GetPartData()
+            print newPart
+
+        elif (val == wx.ID_CANCEL):
+            print "Discarding changes"
+        else:
+            print "Invalid return from dialog"
+        #
+
+        # Now kill the dialog processing
+        dlg.Destroy()
+
         evt.Skip()
     #
 

@@ -220,8 +220,9 @@ if __name__ == "__main__":
 
     # Populate the part from a list
     l = [0, "Barcode", "Website", "Mfg", "MfgPartNo", "MfgBarcode", "MfgWebsite", "Vendor", "VendorPartNo", "VendorBarcode", "VendorWebsite", "Quantity", "Title", "Description", "Catagory", "Package", "Location", "Notes"]
+    print l
     p.setFromList(l)
-    print p
+    print "SetFromList", p
 
     print p.getValueByIndex(1)
     print p.getValueByIndex(2)
