@@ -41,6 +41,10 @@ class Part():
         self.fields.append( PartFieldInfo(16, "Location",      "Location",       "TEXT",                True,     "*") )
         self.fields.append( PartFieldInfo(17, "Notes",         "Notes",          "TEXT",                True,     "*") )
 
+        self.numFields = len(self.fields)
+
+        self.values = ["" for x in range(self.numFields)]
+
         self.setDefaults()
 
     #
@@ -52,16 +56,10 @@ class Part():
 
         # For each field
         for fld in self.fields:
-
-            if ("TEXT" in fld.SqlType):
-                exec("self.%s='%s'" % (fld.SqlName, fld.DefaultVal))
-            elif ("INTEGER" in fld.SqlType):
-                exec("self.%s=%d" % (fld.SqlName, fld.DefaultVal))
-            else:
-                pass
-            #
-
+            self.values[fld.Id] = fld.DefaultVal
         #
+
+    #
 
 
     ###################################################################
@@ -70,8 +68,9 @@ class Part():
     def setFromList(self, lst):
 
         # For each field
-        for fld in self.fields:
-            exec("self.%s=lst[%d]" % (fld.SqlName, fld.Id))
+        for iFld in range(self.numFields):
+            fld = self.fields[iFld]
+            self.values[fld.Id] = lst[iFld]
         #
 
     #
@@ -84,12 +83,12 @@ class Part():
         retval="Part("
 
         # For each field
-        for fld in self.fields:
-            exec("v=self.%s" % (fld.SqlName))
+        for iFld in range(self.numFields):
+            fld = self.fields[iFld]
             if ("TEXT" in fld.SqlType):
-                retval = retval + '"%s"' % v + ","
+                retval = retval + '"%s"' % self.values[iFld] + ","
             elif ("INTEGER" in fld.SqlType):
-                retval = retval + '%d' % v + ","
+                retval = retval + '%d' % self.values[iFld] + ","
             else:
                 pass
         #
@@ -105,12 +104,12 @@ class Part():
         retval=""
 
         # For each field
-        for fld in self.fields:
-            exec("v=self.%s" % (fld.SqlName))
+        for iFld in range(self.numFields):
+            fld = self.fields[iFld]
             if ("TEXT" in fld.SqlType):
-                retval = retval + '"%s"' % v + ","
+                retval = retval + '"%s"' % self.values[iFld] + ","
             elif ("INTEGER" in fld.SqlType):
-                retval = retval + '%d' % v + ","
+                retval = retval + '%d' % self.values[iFld] + ","
             else:
                 pass
             #
@@ -127,6 +126,7 @@ class Part():
             return self.fields[n]
         except:
             raise IndexError()
+        #
     #
 
     ###################################################################
@@ -141,7 +141,7 @@ class Part():
     ###################################################################
     def getValueByIndex(self,n):
         try:
-            exec("v=self.%s" % (self.fields[n].SqlName))
+            v = self.values[self.fields[n].Id]
         except:
             print "Invalid index"
             raise IndexError()
@@ -154,13 +154,7 @@ class Part():
     ###################################################################
     def setValueByIndex(self, n, val):
         try:
-            if (isinstance(val, str)):
-                exec('self.%s="%s"' % (self.fields[n].SqlName,val))
-            elif (isinstance(val, int)):
-                exec("self.%s=%s" % (self.fields[n].SqlName,val))
-            else:
-                print "Invalid type in setValueByIndex"
-            #
+            self.values[self.fields[n].Id] = val
         except:
             print "Invalid index in setValueByIndex"
             raise IndexError()
@@ -171,17 +165,8 @@ class Part():
     # Get number of fields
     ###################################################################
     def getNumFields(self):
-        return len(self.fields)
+        return self.numFields
     #
-
-
-    ###################################################################
-    # Get number of fields in database
-    ###################################################################
-    def getNumFields(self):
-        return len(self.fields)
-    #
-
 
 
     ###################################################################
@@ -208,7 +193,7 @@ if __name__ == "__main__":
     p = Part()
     print p
 
-    p.PartNo = 33
+    p.setValueByIndex(0, 33)
     print p
 
     # Set all fields to defaults

@@ -169,9 +169,10 @@ class PartsTab(gridlib.Grid):
         sys.stdout.write("OnCellLeftDClick: (%d,%d) %s\n" %
                        (evt.GetRow(), evt.GetCol(), evt.GetPosition()))
 
-        # Get the part number from the grid
-        partNo = 3
-        
+        selectedRow = evt.GetRow()
+
+        partNo = self.GetCellValue(selectedRow, 0)
+
         # Open the edit dialog
         dlg = PartsDlg.PartsDlg(self, -1, "Edit", partNo, self.db)
         dlg.CenterOnScreen()
@@ -182,9 +183,9 @@ class PartsTab(gridlib.Grid):
         # If user wants to accept the new data
         if (val == wx.ID_OK):
 
-            # Get the new part data from the dialog
-            newPart = dlg.GetPartData()
-            print newPart
+            # Get the new list of values from the dialog
+            newLst = dlg.GetPartData()
+            print newLst
 
         elif (val == wx.ID_CANCEL):
             print "Discarding changes"

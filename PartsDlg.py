@@ -32,8 +32,7 @@ class PartsDlg(wx.Dialog):
                            None, 
                            -1, 
                            "Edit",
-                           style=wx.DEFAULT_DIALOG_STYLE|wx.THICK_FRAME|wx.RESIZE_BORDER|
-                                 wx.TAB_TRAVERSAL)
+                           style=wx.DEFAULT_DIALOG_STYLE|wx.THICK_FRAME|wx.RESIZE_BORDER|wx.TAB_TRAVERSAL)
 
         # Get the part data for this row
         rows = self.db.GetPartBy("PartNo", self.partNo)
@@ -69,6 +68,7 @@ class PartsDlg(wx.Dialog):
                 st = 0
             else:
                 st = wx.TE_READONLY
+            #
 
             # Create item to hold value
             if (type(row[iFld]) is types.IntType):
