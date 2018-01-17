@@ -1,7 +1,7 @@
 
 import wx
 import types
-import Part
+import Category
 import Database
 
 
@@ -36,7 +36,7 @@ class CategoryDlg(wx.Dialog):
                            style=wx.DEFAULT_DIALOG_STYLE|wx.THICK_FRAME|wx.RESIZE_BORDER|wx.TAB_TRAVERSAL)
 
         # Get the category data for this row
-        rows = self.db.GetPartBy("PartNo", self.categoryNo)
+        rows = self.db.GetCategoryBy("CategoryNo", self.categoryNo)
 
         if (len(rows) != 1):
             print "Invalid results"
@@ -45,14 +45,14 @@ class CategoryDlg(wx.Dialog):
         row = rows[0]
 
         # Create a category from the row
-        category = Part.Part()
+        category = Category.Category()
         category.setFromList(row)
 
         # Create a vertical sizer to put all items in
         vSizer = wx.BoxSizer(wx.VERTICAL)
 
         # Get list of all fields
-        flds = self.db.GetPartAllFieldInfo()
+        flds = self.db.GetCategorytAllFieldInfo()
 
         self.values = []
 
@@ -119,12 +119,12 @@ class CategoryDlg(wx.Dialog):
     #******************************************************************
     #
     #******************************************************************
-    def GetPartData(self):
+    def GetCategoryData(self):
 
         retval = []
 
         # Get list of all fields
-        flds = self.db.GetPartAllFieldInfo()
+        flds = self.db.GetCategoryAllFieldInfo()
 
         # For each field in the category
         for iFld in range(len(flds)):

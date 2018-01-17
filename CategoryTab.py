@@ -175,7 +175,7 @@ class CategoryTab(gridlib.Grid):
         categoryNo = self.GetCellValue(selectedRow, 0)
 
         # Open the edit dialog
-        dlg = CategorysDlg.CategorysDlg(self, -1, "Edit", categoryNo, selectedCol, self.db)
+        dlg = CategoryDlg.CategoryDlg(self, -1, "Edit", categoryNo, selectedCol, self.db)
         dlg.CenterOnScreen()
 
         # Display dialog and wait for OK or Cancel

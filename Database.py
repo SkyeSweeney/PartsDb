@@ -84,6 +84,8 @@ class Database():
         #
         cmd = cmd[:-1] + ")"
 
+        print cmd
+
         self.c.execute(cmd)
         self.conn.commit()
   

@@ -7,6 +7,7 @@ import time
 import os
 
 import Part
+import Category
 import Database
 
 
@@ -54,16 +55,16 @@ if __name__ == "__main__":
 
     db.EndTransaction()
 
+
+
     # Add some classes to the DB
-    db.AddCategory("Opto")
-    db.AddCategory("Amp")
-    db.AddCategory("Regulator")
-    db.AddCategory("Passive")
-    db.AddCategory("Mechanical")
-    db.AddCategory("Transistor")
-    db.AddCategory("Micro")
-    db.AddCategory("Memory")
-    db.AddCategory("Linear")
+
+    # Create a blank category
+    category = Category.Category()
+    category.setFromList([0,"Opto-0","Desc-0","Notes-0"])
+    db.AddCategory(category)
+    category.setFromList([1,"FETS-1","Desc-1","Notes-1"])
+    db.AddCategory(category)
 
     # Close the database
     db.CloseDataBase()  
