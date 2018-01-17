@@ -19,6 +19,7 @@ class PartsDlg(wx.Dialog):
                  ID, 
                  title, 
                  partNo,
+                 selectedCol,
                  db,
                  size=wx.DefaultSize, 
                  pos=wx.DefaultPosition, 
@@ -85,6 +86,8 @@ class PartsDlg(wx.Dialog):
             # Add this row to the vertical sizer
             vSizer.Add(hSizer, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 0)
         #
+
+        self.values[selectedCol].SetFocus()
 
         hSizer = wx.BoxSizer(wx.HORIZONTAL)
 

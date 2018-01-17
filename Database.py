@@ -178,6 +178,25 @@ class Database():
     ###################################################################
     #
     ###################################################################
+    def UpdatePart(self, myPartNum, lst, commit=True):
+        if (not self.dbOpen):
+            print "DB is not open"
+            return
+        #
+        cmd = "UPDATE PartsTbl SET fld1=val,fld2=val,... WHERE MyPartNum=%s" % (myPartNum)
+        try:
+            self.c.execute(cmd)
+            if commit:
+                self.conn.commit()
+            #
+        except sqlite3.Error as e:
+            print __name__, e.args[0]
+        #
+    #
+  
+    ###################################################################
+    #
+    ###################################################################
     def StartTransaction(self):
         if (not self.dbOpen):
             print "DB is not open"

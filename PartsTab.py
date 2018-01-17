@@ -170,11 +170,12 @@ class PartsTab(gridlib.Grid):
                        (evt.GetRow(), evt.GetCol(), evt.GetPosition()))
 
         selectedRow = evt.GetRow()
+        selectedCol = evt.GetCol()
 
         partNo = self.GetCellValue(selectedRow, 0)
 
         # Open the edit dialog
-        dlg = PartsDlg.PartsDlg(self, -1, "Edit", partNo, self.db)
+        dlg = PartsDlg.PartsDlg(self, -1, "Edit", partNo, selectedCol, self.db)
         dlg.CenterOnScreen()
 
         # Display dialog and wait for OK or Cancel
