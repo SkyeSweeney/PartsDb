@@ -4,6 +4,7 @@ import doctest
 import time
 import types
 import Part
+import Category
 
 
 
@@ -17,8 +18,10 @@ class Database():
     # Constructor
     ###################################################################
     def __init__(self):
-        self.templatePart = Part.Part()
-        self.numPartFields = self.templatePart.getNumFields()
+        self.templatePart      = Part.Part()
+        self.templateCategory  = Category.Category()
+        self.numPartFields     = self.templatePart.getNumFields()
+        self.numCategoryFields = self.templateCategory.getNumFields()
         self.dbOpen = False
     #
   
@@ -71,8 +74,16 @@ class Database():
         self.conn.commit()
   
         # Create the Category table (FET, Sensor, ...)
-        cmd = "CREATE TABLE CategoryTbl(CategoryID INTEGER PRIMARY KEY, " +\
-                                        "Class   text)"
+        cmd = "CREATE TABLE CategoryTbl("
+
+        for i in range(self.numCategoryFields):
+            fld = self.templateCategory.getFieldInfo(i)
+            n = fld.SqlName # field name
+            t = fld.SqlType # field type
+            cmd = cmd + "%s %s," % (n, t)
+        #
+        cmd = cmd[:-1] + ")"
+
         self.c.execute(cmd)
         self.conn.commit()
   
@@ -94,6 +105,59 @@ class Database():
         self.conn.close()
         self.dbOpen = False
     #
+  
+    ###################################################################
+    #
+    ###################################################################
+    def StartTransaction(self):
+        if (not self.dbOpen):
+            print "DB is not open"
+            return
+        #
+        cmd = "BEGIN TRANSACTION"
+        try:
+            self.c.execute(cmd)
+        except sqlite3.Error as e:
+            print __name__, e.args[0]
+        #
+    #
+  
+    ###################################################################
+    #
+    ###################################################################
+    def EndTransaction(self):
+        if (not self.dbOpen):
+            print "DB is not open"
+            return
+        #
+        cmd = "COMMIT"
+        try:
+            self.c.execute(cmd)
+        except sqlite3.Error as e:
+            print __name__, e.args[0]
+        #
+    #
+  
+  
+    ###################################################################
+    #
+    ###################################################################
+    def AbortTransaction(self):
+        if (not self.dbOpen):
+            print "DB is not open"
+            return
+        #
+        cmd = "ROLLBACK"
+        try:
+            self.c.execute(cmd)
+        except sqlite3.Error as e:
+            print __name__, e.args[0]
+        #
+    #
+
+
+
+
   
     ###################################################################
     #
@@ -209,109 +273,7 @@ class Database():
             print __name__, e.args[0]
         #
     #
-  
-    ###################################################################
-    #
-    ###################################################################
-    def StartTransaction(self):
-        if (not self.dbOpen):
-            print "DB is not open"
-            return
-        #
-        cmd = "BEGIN TRANSACTION"
-        try:
-            self.c.execute(cmd)
-        except sqlite3.Error as e:
-            print __name__, e.args[0]
-        #
-    #
-  
-    ###################################################################
-    #
-    ###################################################################
-    def EndTransaction(self):
-        if (not self.dbOpen):
-            print "DB is not open"
-            return
-        #
-        cmd = "COMMIT"
-        try:
-            self.c.execute(cmd)
-        except sqlite3.Error as e:
-            print __name__, e.args[0]
-        #
-    #
-  
-  
-    ###################################################################
-    #
-    ###################################################################
-    def AbortTransaction(self):
-        if (not self.dbOpen):
-            print "DB is not open"
-            return
-        #
-        cmd = "ROLLBACK"
-        try:
-            self.c.execute(cmd)
-        except sqlite3.Error as e:
-            print __name__, e.args[0]
-        #
-    #
-  
-    ###################################################################
-    #
-    ###################################################################
-    def AddCategory(self, name):
-        if (not self.dbOpen):
-            print "DB is not open"
-            return
-        #
-        cmd = 'INSERT INTO CategoryTbl(Class) VALUES ("%s")' % (name)
-        try:
-            self.c.execute(cmd)
-            self.conn.commit()
-        except sqlite3.Error as e:
-            print __name__, e.args[0]
-        #
-    #
-  
-    ###################################################################
-    #
-    ###################################################################
-    def GetCategory(self):
-        if (not self.dbOpen):
-            print "DB is not open"
-            return
-        #
-        cmd = "SELECT * FROM CategoryTbl"
-        try:
-            classes = []
-            for row in self.c.execute(cmd):
-                classes.append(row)
-            #
-        except sqlite3.Error as e:
-            print __name__, e.args[0]
-        #
-        return classes  
-    #
-  
-    ###################################################################
-    #
-    ###################################################################
-    def DelCategory(self, name):
-        if (not self.dbOpen):
-            print "DB is not open"
-            return
-        #
-        cmd = "DELETE FROM CategoryTbl WHERE Class=%s" % (name)
-        try:
-            self.c.execute(cmd)
-            self.conn.commit()
-        except sqlite3.Error as e:
-            print __name__, e.args[0]
-        #
-    #
+
 
     ###################################################################
     # 
@@ -332,6 +294,151 @@ class Database():
     ###################################################################
     def GetPartFieldInfo(self, i):  
         return self.templatePart.getFieldInfo(i)
+    #
+
+
+
+
+  
+    ###################################################################
+    #
+    ###################################################################
+    def GetAllCategorys(self):
+
+        if (not self.dbOpen):
+            print "DB is not open"
+            return
+        #
+        cmd = "SELECT * FROM CategoryTbl;"
+        try:
+            rows = []
+            for row in self.c.execute(cmd):
+                rows.append(row)
+            #
+        except sqlite3.Error as e:
+            print e.args[0]
+        #
+
+        return rows  
+    #
+  
+    ###################################################################
+    #
+    ###################################################################
+    def GetCategoryBy(self, field, value):
+
+        if (not self.dbOpen):
+            print "DB is not open"
+            return
+        #
+        cmd = "SELECT * FROM CategoryTbl WHERE %s == %s" % (field, str(value))
+        try:
+            rows = []
+            for row in self.c.execute(cmd):
+                rows.append(row)
+            #
+        except sqlite3.Error as e:
+            print e.args[0]
+        #
+
+        return rows  
+    #
+  
+    ###################################################################
+    #
+    ###################################################################
+    def AddCategory(self, category, commit=True):
+
+        if (not self.dbOpen):
+            print "DB is not open"
+            return
+        #
+        cmd = "INSERT INTO CategoryTbl VALUES (%s)" % (category.makeRecord())
+        try:
+            self.c.execute(cmd)
+            if commit:
+                self.conn.commit()
+            #
+            
+        except sqlite3.Error as e:
+            print __name__, e.args[0]
+        #
+    #
+  
+    ###################################################################
+    #
+    ###################################################################
+    def DelCategory(self, myCategoryNo, commit=True):
+
+        if (not self.dbOpen):
+            print "DB is not open"
+            return
+        #
+        cmd = "DELETE FROM CategoryTbl WHERE CategoryNo=%s" % (myCategoryNo)
+        try:
+            self.c.execute(cmd)
+            if commit:
+                self.conn.commit()
+            #
+        except sqlite3.Error as e:
+            print __name__, e.args[0]
+        #
+    #
+  
+    ###################################################################
+    #
+    ###################################################################
+    def UpdateCategory(self, myCategoryNo, lst, commit=True):
+
+        if (not self.dbOpen):
+            print "DB is not open"
+            return
+        #
+
+        # Create command
+        setStr = "SET "
+        flds = self.GetCategoryAllFieldInfo()
+        for iFld in range(len(flds)):
+            if (type(lst[iFld]) is types.IntType):
+                setStr = setStr + "%s=%d," %(flds[iFld].SqlName,lst[iFld])
+            else:                
+                setStr = setStr + '%s="%s",' %(flds[iFld].SqlName,lst[iFld])
+            #
+        #
+        setStr = setStr[:-1]
+        cmd = "UPDATE CategoryTbl %s WHERE CategoryNo=%s" % (setStr,myCategoryNo)
+
+        # Execute the command
+        try:
+            self.c.execute(cmd)
+            if commit:
+                self.conn.commit()
+            #
+        except sqlite3.Error as e:
+            print __name__, e.args[0]
+        #
+    #
+
+
+    ###################################################################
+    # 
+    ###################################################################
+    def GetNumCategoryFields(self):  
+        return self.numCategoryFields
+    #
+
+    ###################################################################
+    # Get all a list of field info for all parts
+    ###################################################################
+    def GetCategoryAllFieldInfo(self):  
+        return self.templateCategory.getAllFieldInfo()
+    #
+
+    ###################################################################
+    # Get field info for a given field
+    ###################################################################
+    def GetCategoryFieldInfo(self, i):  
+        return self.templateCategory.getFieldInfo(i)
     #
   
 #
