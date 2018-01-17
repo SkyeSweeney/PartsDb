@@ -5,7 +5,7 @@ import time
 import sys
 import types
 
-import PartsDlg
+import PartsDlg 
 
 
 #######################################################################

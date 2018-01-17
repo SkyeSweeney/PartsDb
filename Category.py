@@ -206,7 +206,7 @@ if __name__ == "__main__":
     print p.getFieldInfo(3)
     print p.getAllFieldInfo()
     try:
-        print p.getFieldInfo(99)
+        print p.getFieldInfo(99) 
     except:
         print "Bad index"
     #
