@@ -11,7 +11,6 @@ import sys
 import ColorPanel
 import PartsTab
 import Database
-import FilterTab
 import App
 
 
