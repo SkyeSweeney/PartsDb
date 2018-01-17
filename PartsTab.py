@@ -188,6 +188,8 @@ class PartsTab(gridlib.Grid):
             newLst = dlg.GetPartData()
             print newLst
 
+            self.db.UpdatePart(partNo, newLst)
+
         elif (val == wx.ID_CANCEL):
             print "Discarding changes"
         else:

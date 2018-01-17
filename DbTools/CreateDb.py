@@ -4,10 +4,10 @@ sys.path.insert(0, '..')
 import sqlite3
 import doctest
 import time
+import os
+
 import Part
 import Database
-import os
-import Fields
 
 
 
@@ -23,7 +23,7 @@ if __name__ == "__main__":
 
     # Open the database
     db = Database.Database()
-    db.OpenDataBase()  
+    db.OpenDataBase("Parts.db")  
 
     # Create a blank part
     part = Part.Part()
@@ -32,24 +32,24 @@ if __name__ == "__main__":
     db.StartTransaction()
 
     # add a few sample records
-    for iRow in range(10):
+    for iRow in range(30):
 
         # for each field in part
-        for iCol in range(part.getNumFields()):
+        for iFld in range(part.getNumFields()):
 
-            t = part.getFields(iCol)[3]   # Type
-            n = part.getFields(iCol)[1]   # Sql Name
+            t = part.getFieldInfo(iFld).SqlType   # Type
+            n = part.getFieldInfo(iFld).SqlName   # Sql Name
 
             if ("TEXT" in t):
-                part.setValueByIndex(iCol, "F-%s-%d"%(n,iRow))
+                part.setValueByIndex(iFld, "F-%s-%d"%(n,iRow))
             elif ("INTEGER" in t):
-                part.setValueByIndex(iCol, iRow)
+                part.setValueByIndex(iFld, iRow)
             else:
                 pass
             #
 
         #
-        db.AddRecord(part, commit=False)
+        db.AddPart(part, commit=False)
     #
 
     db.EndTransaction()

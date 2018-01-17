@@ -2,6 +2,7 @@
 import sqlite3
 import doctest
 import time
+import types
 import Part
 
 
@@ -59,7 +60,7 @@ class Database():
         cmd = "CREATE TABLE PartsTbl("
 
         for i in range(self.numPartFields):
-            fld = self.templatePart.getFields(i)
+            fld = self.templatePart.getFieldInfo(i)
             n = fld.SqlName # field name
             t = fld.SqlType # field type
             cmd = cmd + "%s %s," % (n, t)
@@ -164,7 +165,7 @@ class Database():
             print "DB is not open"
             return
         #
-        cmd = "DELETE FROM PartsTbl WHERE MyPartNum=%s" % (myPartNum)
+        cmd = "DELETE FROM PartsTbl WHERE PartNo=%s" % (myPartNum)
         try:
             self.c.execute(cmd)
             if commit:
@@ -179,11 +180,25 @@ class Database():
     #
     ###################################################################
     def UpdatePart(self, myPartNum, lst, commit=True):
+
         if (not self.dbOpen):
             print "DB is not open"
             return
         #
-        cmd = "UPDATE PartsTbl SET fld1=val,fld2=val,... WHERE MyPartNum=%s" % (myPartNum)
+
+        # Create command
+        setStr = "SET "
+        flds = self.GetPartAllFieldInfo()
+        for iFld in range(len(flds)):
+            if (type(lst[iFld]) is types.IntType):
+                setStr = setStr + "%s=%d," %(flds[iFld].SqlName,lst[iFld])
+            else:                
+                setStr = setStr + "%s=%s," %(flds[iFld].SqlName,lst[iFld])
+            #
+        #
+        cmd = "UPDATEZ PartsTbl %s WHERE PartNo=%s" % (setStr,myPartNum)
+        print cmd
+
         try:
             self.c.execute(cmd)
             if commit:
