@@ -14,7 +14,7 @@ import PartsDlg
 class PartsTab(gridlib.Grid):
 
     ###################################################################
-    #
+    # Constructor
     ###################################################################
     def __init__(self, parent, db, log):
 
@@ -127,7 +127,7 @@ class PartsTab(gridlib.Grid):
     #
 
     ###################################################################
-    # Add a new reconrd to the end 
+    # Add a new record to the end 
     ###################################################################
     def AppendRecord(self, row):
         self.AppendRows(1)
@@ -145,7 +145,7 @@ class PartsTab(gridlib.Grid):
 
 
     ###################################################################
-    #
+    # Left click
     ###################################################################
     def OnCellLeftClick(self, evt):
         sys.stdout.write("OnCellLeftClick: (%d,%d) %s\n" %
@@ -154,7 +154,7 @@ class PartsTab(gridlib.Grid):
     #
 
     ###################################################################
-    #
+    # Right click
     ###################################################################
     def OnCellRightClick(self, evt):
         sys.stdout.write("OnCellRightClick: (%d,%d) %s\n" %
@@ -163,7 +163,7 @@ class PartsTab(gridlib.Grid):
     #
 
     ###################################################################
-    #
+    # Left double click
     ###################################################################
     def OnCellLeftDClick(self, evt):
         sys.stdout.write("OnCellLeftDClick: (%d,%d) %s\n" %
@@ -213,7 +213,7 @@ class PartsTab(gridlib.Grid):
     #
 
     ###################################################################
-    #
+    # Right double click
     ###################################################################
     def OnCellRightDClick(self, evt):
         sys.stdout.write("OnCellRightDClick: (%d,%d) %s\n" %
@@ -222,7 +222,7 @@ class PartsTab(gridlib.Grid):
     #
 
     ###################################################################
-    #
+    # Left click on label
     ###################################################################
     def OnLabelLeftClick(self, evt):
         sys.stdout.write("OnLabelLeftClick: (%d,%d) %s\n" %
@@ -231,7 +231,7 @@ class PartsTab(gridlib.Grid):
     #
 
     ###################################################################
-    #
+    # Right clock on label
     ###################################################################
     def OnLabelRightClick(self, evt):
         sys.stdout.write("OnLabelRightClick: (%d,%d) %s\n" %
@@ -240,7 +240,7 @@ class PartsTab(gridlib.Grid):
     #
 
     ###################################################################
-    #
+    # Left double click on label
     ###################################################################
     def OnLabelLeftDClick(self, evt):
         sys.stdout.write("OnLabelLeftDClick: (%d,%d) %s\n" %
@@ -249,7 +249,7 @@ class PartsTab(gridlib.Grid):
     #
 
     ###################################################################
-    #
+    # Right double clcoik on label
     ###################################################################
     def OnLabelRightDClick(self, evt):
         sys.stdout.write("OnLabelRightDClick: (%d,%d) %s\n" %
@@ -258,7 +258,7 @@ class PartsTab(gridlib.Grid):
     #
 
     ###################################################################
-    #
+    # User resizes a row
     ###################################################################
     def OnRowSize(self, evt):
         sys.stdout.write("OnRowSize: row %d, %s\n" %
@@ -267,7 +267,7 @@ class PartsTab(gridlib.Grid):
     #
 
     ###################################################################
-    #
+    # User resizes a column
     ###################################################################
     def OnColSize(self, evt):
         sys.stdout.write("OnColSize: col %d, %s\n" %
@@ -276,7 +276,7 @@ class PartsTab(gridlib.Grid):
     #
 
     ###################################################################
-    #
+    # User selects a range or rows or columns
     ###################################################################
     def OnRangeSelect(self, evt):
         if evt.Selecting():
@@ -294,60 +294,38 @@ class PartsTab(gridlib.Grid):
     # Called when the user edits a cell
     ###################################################################
     def OnCellChange(self, evt):
+
         sys.stdout.write("OnCellChange: (%d,%d) %s\n" %
                        (evt.GetRow(), evt.GetCol(), evt.GetPosition()))
 
-        # Show how to stay in a cell that has bad data.  We can't just
-        # call SetGridCursor here since we are nested inside one so it
-        # won't have any effect.  Instead, set coordinates to move to in
-        # idle time.
-        value = self.GetCellValue(evt.GetRow(), evt.GetCol())
-
-        if value == 'no good':
-            self.moveTo = evt.GetRow(), evt.GetCol()
-        #
+        # Show how to move to a new cell
+        #self.SetGridCursor(2,3)
     #
 
 
     ###################################################################
-    #
+    # Nothing happening
     ###################################################################
     def OnIdle(self, evt):
-        if self.moveTo != None:
-            self.SetGridCursor(self.moveTo[0], self.moveTo[1])
-            self.moveTo = None
-        #
-
         evt.Skip()
     #
 
 
     ###################################################################
-    #
+    # Cell is selected or deselected
     ###################################################################
     def OnSelectCell(self, evt):
+
+        row = evt.GetRow()
+        col = evt.GetCol()
+
         if evt.Selecting():
             msg = 'Selected'
         else:
             msg = 'Deselected'
         #
         sys.stdout.write("OnSelectCell: %s (%d,%d) %s\n" %
-                       (msg, evt.GetRow(), evt.GetCol(), evt.GetPosition()))
-
-        # Another way to stay in a cell that has a bad value...
-        row = self.GetGridCursorRow()
-        col = self.GetGridCursorCol()
-
-        if self.IsCellEditControlEnabled():
-            self.HideCellEditControl()
-            self.DisableCellEditControl()
-        #
-
-        value = self.GetCellValue(row, col)
-
-        if value == 'no good 2':
-            return  # cancels the cell selection
-        #
+                       (msg, row, col, evt.GetPosition()))
 
         evt.Skip()
     #
@@ -357,15 +335,12 @@ class PartsTab(gridlib.Grid):
     #
     ###################################################################
     def OnEditorShown(self, evt):
-        if evt.GetRow() == 6 and evt.GetCol() == 3 and \
-           wx.MessageBox("Are you sure you wish to edit this cell?",
-                        "Checking", wx.YES_NO) == wx.NO:
-            evt.Veto()
-            return
-        #
+
+        row = evt.GetRow()
+        col = evt.GetCol()
 
         sys.stdout.write("OnEditorShown: (%d,%d) %s\n" %
-                       (evt.GetRow(), evt.GetCol(), evt.GetPosition()))
+                       (row, col, evt.GetPosition()))
         evt.Skip()
     #
 
@@ -374,14 +349,11 @@ class PartsTab(gridlib.Grid):
     #
     ###################################################################
     def OnEditorHidden(self, evt):
-        if evt.GetRow() == 6 and evt.GetCol() == 3 and \
-           wx.MessageBox("Are you sure you wish to  finish editing this cell?",
-                        "Checking", wx.YES_NO) == wx.NO:
-            evt.Veto()
-            return
+        row = evt.GetRow()
+        col = evt.GetCol()
 
         sys.stdout.write("OnEditorHidden: (%d,%d) %s\n" %
-                       (evt.GetRow(), evt.GetCol(), evt.GetPosition()))
+                       (row, col, evt.GetPosition()))
         evt.Skip()
     #
 
@@ -390,8 +362,10 @@ class PartsTab(gridlib.Grid):
     #
     ###################################################################
     def OnEditorCreated(self, evt):
+        row = evt.GetRow()
+        col = evt.GetCol()
         sys.stdout.write("OnEditorCreated: (%d, %d) %s\n" %
-                       (evt.GetRow(), evt.GetCol(), evt.GetControl()))
+                       (row, col, evt.GetControl()))
     #    
 #
 
