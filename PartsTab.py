@@ -186,9 +186,19 @@ class PartsTab(gridlib.Grid):
 
             # Get the new list of values from the dialog
             newLst = dlg.GetPartData()
-            print newLst
 
+            # Update the database
             self.db.UpdatePart(partNo, newLst)
+
+            # Redraw the line in the grid
+            n = len(newLst)
+            for j in range(n):
+                if (type(newLst[j]) is types.IntType):
+                    self.SetCellValue(selectedRow, j,  str(newLst[j]))
+                else:
+                    self.SetCellValue(selectedRow, j,  newLst[j])
+                #
+            #
 
         elif (val == wx.ID_CANCEL):
             print "Discarding changes"

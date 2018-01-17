@@ -193,12 +193,13 @@ class Database():
             if (type(lst[iFld]) is types.IntType):
                 setStr = setStr + "%s=%d," %(flds[iFld].SqlName,lst[iFld])
             else:                
-                setStr = setStr + "%s=%s," %(flds[iFld].SqlName,lst[iFld])
+                setStr = setStr + '%s="%s",' %(flds[iFld].SqlName,lst[iFld])
             #
         #
-        cmd = "UPDATEZ PartsTbl %s WHERE PartNo=%s" % (setStr,myPartNum)
-        print cmd
+        setStr = setStr[:-1]
+        cmd = "UPDATE PartsTbl %s WHERE PartNo=%s" % (setStr,myPartNum)
 
+        # Execute the command
         try:
             self.c.execute(cmd)
             if commit:
