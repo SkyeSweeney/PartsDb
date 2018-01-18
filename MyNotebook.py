@@ -8,9 +8,9 @@ import wx
 import os
 import sys
 
-import ColorPanel
 import PartsTab
 import CategoryTab
+import ProjectTab
 import Database
 import App
 
@@ -54,7 +54,7 @@ class MyNotebook(wx.Notebook):
         self.AddPage(self.categoryTab, "Category")
 
         # Make the Project tab
-        self.projectTab = self.makeColorPanel(wx.RED)
+        self.projectTab = ProjectTab.ProjectTab(self, self.db, self.log)
         self.AddPage(self.projectTab, "Projects")
 
         # Bind to tab changing routines

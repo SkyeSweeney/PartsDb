@@ -1,7 +1,7 @@
 
 import wx
 import types
-import Category
+import Project
 import Database
 
 
@@ -9,7 +9,7 @@ import Database
 #**********************************************************************
 #
 #**********************************************************************
-class CategoryDlg(wx.Dialog):
+class ProjectDlg(wx.Dialog):
 
     #******************************************************************
     #
@@ -18,7 +18,7 @@ class CategoryDlg(wx.Dialog):
                  parent, 
                  ID, 
                  title, 
-                 categoryNo,
+                 projectNo,
                  selectedCol,
                  db,
                  size=wx.DefaultSize, 
@@ -27,7 +27,7 @@ class CategoryDlg(wx.Dialog):
                  ):
 
         self.db = db
-        self.categoryNo = categoryNo
+        self.projectNo = projectNo
 
         wx.Dialog.__init__(self, 
                            None, 
@@ -35,8 +35,8 @@ class CategoryDlg(wx.Dialog):
                            "Edit",
                            style=wx.DEFAULT_DIALOG_STYLE|wx.THICK_FRAME|wx.RESIZE_BORDER|wx.TAB_TRAVERSAL)
 
-        # Get the category data for this row
-        rows = self.db.GetCategoryBy("CategoryNo", self.categoryNo)
+        # Get the project data for this row
+        rows = self.db.GetProjectBy("ProjectNo", self.projectNo)
 
         if (len(rows) != 1):
             print "Invalid results"
@@ -44,19 +44,19 @@ class CategoryDlg(wx.Dialog):
         #
         row = rows[0]
 
-        # Create a category from the row
-        category = Category.Category()
-        category.setFromList(row)
+        # Create a project from the row
+        project = Project.Project()
+        project.setFromList(row)
 
         # Create a vertical sizer to put all items in
         vSizer = wx.BoxSizer(wx.VERTICAL)
 
         # Get list of all fields
-        flds = self.db.GetCategoryAllFieldInfo()
+        flds = self.db.GetProjectAllFieldInfo()
 
         self.values = []
 
-        # For each field in the category
+        # For each field in the project
         for iFld in range(len(flds)):
 
             # Create a sizer for row
@@ -119,14 +119,14 @@ class CategoryDlg(wx.Dialog):
     #******************************************************************
     #
     #******************************************************************
-    def GetCategoryData(self):
+    def GetProjectData(self):
 
         retval = []
 
         # Get list of all fields
-        flds = self.db.GetCategoryAllFieldInfo()
+        flds = self.db.GetProjectAllFieldInfo()
 
-        # For each field in the category
+        # For each field in the project
         for iFld in range(len(flds)):
 
             val = self.values[iFld].GetValue()

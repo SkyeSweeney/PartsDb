@@ -5,6 +5,7 @@ import time
 import types
 import Part
 import Category
+import Project
 
 
 
@@ -20,8 +21,10 @@ class Database():
     def __init__(self):
         self.templatePart      = Part.Part()
         self.templateCategory  = Category.Category()
+        self.templateProject   = Project.Project()
         self.numPartFields     = self.templatePart.getNumFields()
         self.numCategoryFields = self.templateCategory.getNumFields()
+        self.numProjectFields  = self.templateProject.getNumFields()
         self.dbOpen = False
     #
   
@@ -89,9 +92,19 @@ class Database():
         self.c.execute(cmd)
         self.conn.commit()
   
-        # Create the Project table (Sailboat timer, Energy monitor, ...)
-        cmd = "CREATE TABLE ProjectTbl(ProjectID INTEGER PRIMARY KEY, " +\
-                                       "Project   text)"
+        # Create the Category table (FET, Sensor, ...)
+        cmd = "CREATE TABLE ProjectTbl("
+
+        for i in range(self.numProjectFields):
+            fld = self.templateProject.getFieldInfo(i)
+            n = fld.SqlName # field name
+            t = fld.SqlType # field type
+            cmd = cmd + "%s %s," % (n, t)
+        #
+        cmd = cmd[:-1] + ")"
+
+        print cmd
+
         self.c.execute(cmd)
         self.conn.commit()
     #
@@ -441,6 +454,151 @@ class Database():
     ###################################################################
     def GetCategoryFieldInfo(self, i):  
         return self.templateCategory.getFieldInfo(i)
+    #
+
+
+
+
+  
+    ###################################################################
+    #
+    ###################################################################
+    def GetAllProjects(self):
+
+        if (not self.dbOpen):
+            print "DB is not open"
+            return
+        #
+        cmd = "SELECT * FROM ProjectTbl;"
+        try:
+            rows = []
+            for row in self.c.execute(cmd):
+                rows.append(row)
+            #
+        except sqlite3.Error as e:
+            print e.args[0]
+        #
+
+        return rows  
+    #
+  
+    ###################################################################
+    #
+    ###################################################################
+    def GetProjectBy(self, field, value):
+
+        if (not self.dbOpen):
+            print "DB is not open"
+            return
+        #
+        cmd = "SELECT * FROM ProjectTbl WHERE %s == %s" % (field, str(value))
+        try:
+            rows = []
+            for row in self.c.execute(cmd):
+                rows.append(row)
+            #
+        except sqlite3.Error as e:
+            print e.args[0]
+        #
+
+        return rows  
+    #
+  
+    ###################################################################
+    #
+    ###################################################################
+    def AddProject(self, project, commit=True):
+
+        if (not self.dbOpen):
+            print "DB is not open"
+            return
+        #
+        cmd = "INSERT INTO ProjectTbl VALUES (%s)" % (project.makeRecord())
+        try:
+            self.c.execute(cmd)
+            if commit:
+                self.conn.commit()
+            #
+            
+        except sqlite3.Error as e:
+            print __name__, e.args[0]
+        #
+    #
+  
+    ###################################################################
+    #
+    ###################################################################
+    def DelProject(self, myProjectNo, commit=True):
+
+        if (not self.dbOpen):
+            print "DB is not open"
+            return
+        #
+        cmd = "DELETE FROM ProjectTbl WHERE ProjectNo=%s" % (myProjectNo)
+        try:
+            self.c.execute(cmd)
+            if commit:
+                self.conn.commit()
+            #
+        except sqlite3.Error as e:
+            print __name__, e.args[0]
+        #
+    #
+  
+    ###################################################################
+    #
+    ###################################################################
+    def UpdateProject(self, myProjectNo, lst, commit=True):
+
+        if (not self.dbOpen):
+            print "DB is not open"
+            return
+        #
+
+        # Create command
+        setStr = "SET "
+        flds = self.GetProjectAllFieldInfo()
+        for iFld in range(len(flds)):
+            if (type(lst[iFld]) is types.IntType):
+                setStr = setStr + "%s=%d," %(flds[iFld].SqlName,lst[iFld])
+            else:                
+                setStr = setStr + '%s="%s",' %(flds[iFld].SqlName,lst[iFld])
+            #
+        #
+        setStr = setStr[:-1]
+        cmd = "UPDATE ProjectTbl %s WHERE ProjectNo=%s" % (setStr,myProjectNo)
+
+        # Execute the command
+        try:
+            self.c.execute(cmd)
+            if commit:
+                self.conn.commit()
+            #
+        except sqlite3.Error as e:
+            print __name__, e.args[0]
+        #
+    #
+
+
+    ###################################################################
+    # 
+    ###################################################################
+    def GetNumProjectFields(self):  
+        return self.numProjectFields
+    #
+
+    ###################################################################
+    # Get all a list of field info for all parts
+    ###################################################################
+    def GetProjectAllFieldInfo(self):  
+        return self.templateProject.getAllFieldInfo()
+    #
+
+    ###################################################################
+    # Get field info for a given field
+    ###################################################################
+    def GetProjectFieldInfo(self, i):  
+        return self.templateProject.getFieldInfo(i)
     #
   
 #

@@ -8,6 +8,7 @@ import os
 
 import Part
 import Category
+import Project
 import Database
 
 
@@ -57,7 +58,7 @@ if __name__ == "__main__":
 
 
 
-    # Add some classes to the DB
+    # Add some Categories to the DB
 
     # Create a blank category
     category = Category.Category()
@@ -65,6 +66,17 @@ if __name__ == "__main__":
     db.AddCategory(category)
     category.setFromList([1,"FETS-1","Desc-1","Notes-1"])
     db.AddCategory(category)
+
+
+    # Add some Projects to the DB
+
+    # Create a blank project
+    project = Project.Project()
+    project.setFromList([0,"SailTimer","Desc-0","Notes-0"])
+    db.AddProject(project)
+    project.setFromList([1,"PowerMonitor","Desc-1","Notes-1"])
+    db.AddProject(project)
+
 
     # Close the database
     db.CloseDataBase()  
