@@ -231,9 +231,17 @@ class PartsTab(gridlib.Grid):
     #
 
     ###################################################################
-    # Right clock on label
+    # Right clock on label 
+    # On Row is used to delete record
     ###################################################################
     def OnLabelRightClick(self, evt):
+        row = evt.GetRow()
+        col = evt.GetCol()
+
+        if (col == -1):
+            # Pop up a dialog asking permission to delete record
+            pass
+       
         sys.stdout.write("OnLabelRightClick: (%d,%d) %s\n" %
                        (evt.GetRow(), evt.GetCol(), evt.GetPosition()))
         evt.Skip()
