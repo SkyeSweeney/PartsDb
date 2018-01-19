@@ -124,21 +124,45 @@ class PartsTab(gridlib.Grid):
         self.Bind(gridlib.EVT_GRID_EDITOR_HIDDEN,  self.OnEditorHidden)
         self.Bind(gridlib.EVT_GRID_EDITOR_CREATED, self.OnEditorCreated)
 
+
     #
 
     ###################################################################
     # Add a new record to the end 
     ###################################################################
-    def AppendRecord(self, row):
+    def AppendRecord(self, lst):
         self.AppendRows(1)
-        i = self.GetNumberRows() - 1
-        j = 0
-        n = len(row)
-        for j in range(n):
-            if (type(row[j]) is types.IntType):
-                self.SetCellValue(i, j,  str(row[j]))
+        row = self.GetNumberRows() - 1
+        self.UpdateRecord(row, lst)
+    #
+
+    ###################################################################
+    # Redraw grid
+    ###################################################################
+    def RedrawGrid(self):
+
+        # For each item in the database
+        rows = self.db.GetAllParts()
+        iRow = 0
+        for lst in rows:
+            self.UpdateRecord(iRow, lst)
+            for iCol in range(len(lst)):
+                self.SetReadOnly(iRow, iCol, True)
+            #
+            iRow = iRow + 1
+        #
+
+    #
+
+    ###################################################################
+    # Update a record
+    ###################################################################
+    def UpdateRecord(self, row, lst):
+        for col in range(len(lst)):
+            if (type(lst[col]) is types.IntType):
+                self.SetCellValue(row, col,  str(lst[col]))
             else:
-                self.SetCellValue(i, j,  row[j])
+                self.SetCellValue(row, col,  lst[col])
             #
         #
     #
@@ -174,6 +198,25 @@ class PartsTab(gridlib.Grid):
 
         partNo = self.GetCellValue(selectedRow, 0)
 
+        self.EditPart(partNo, selectedCol)
+
+        evt.Skip()
+    #
+
+
+    ###################################################################
+    # Delete part
+    ###################################################################
+    def DeletePart(self, partNo):
+        self.db.DelPart(partNo)
+    #
+
+    ###################################################################
+    # Edit part (and focus on given column)
+    ###################################################################
+    def EditPart(self, partNo, selectedCol):
+
+
         # Open the edit dialog
         dlg = PartsDlg.PartsDlg(self, -1, "Edit", partNo, selectedCol, self.db)
         dlg.CenterOnScreen()
@@ -190,15 +233,8 @@ class PartsTab(gridlib.Grid):
             # Update the database
             self.db.UpdatePart(partNo, newLst)
 
-            # Redraw the line in the grid
-            n = len(newLst)
-            for j in range(n):
-                if (type(newLst[j]) is types.IntType):
-                    self.SetCellValue(selectedRow, j,  str(newLst[j]))
-                else:
-                    self.SetCellValue(selectedRow, j,  newLst[j])
-                #
-            #
+            # Redraw the grid
+            self.RedrawGrid()
 
         elif (val == wx.ID_CANCEL):
             print "Discarding changes"
@@ -209,8 +245,8 @@ class PartsTab(gridlib.Grid):
         # Now kill the dialog processing
         dlg.Destroy()
 
-        evt.Skip()
     #
+
 
     ###################################################################
     # Right double click
@@ -231,16 +267,48 @@ class PartsTab(gridlib.Grid):
     #
 
     ###################################################################
-    # Right clock on label 
-    # On Row is used to delete record
+    # Right click on label 
+    # On Row is used to edit/add/delete part
+    # On Col is used to hide columns
     ###################################################################
     def OnLabelRightClick(self, evt):
         row = evt.GetRow()
         col = evt.GetCol()
 
+        # Right click on column header
         if (col == -1):
-            # Pop up a dialog asking permission to delete record
+            # Pop up a context menu
+            menu = RowContextMenu(row)
+            self.PopupMenu(menu, evt.GetPosition())
+            retval = menu.GetRetval()
+            menu.Destroy()
+
+            if (retval == 0):
+                print "zip"
+                pass
+            elif (retval == 1):
+                partNo = self.GetCellValue(row, 0)
+                self.EditPart(partNo, col)
+
+            elif (retval == 2):
+                print "delete"
+                partNo = self.GetCellValue(row, 0)
+                self.DeletePart(partNo)
+
+            elif (retval == 3):
+                print "add"
+                pass
+            else:
+                print "zip"
+                pass
+            #
+
+        elif (row == -1):
             pass
+
+        else:
+            pass
+        #
        
         sys.stdout.write("OnLabelRightClick: (%d,%d) %s\n" %
                        (evt.GetRow(), evt.GetCol(), evt.GetPosition()))
@@ -375,5 +443,65 @@ class PartsTab(gridlib.Grid):
         sys.stdout.write("OnEditorCreated: (%d, %d) %s\n" %
                        (row, col, evt.GetControl()))
     #    
+#
+
+#######################################################################
+#
+#######################################################################
+class RowContextMenu(wx.Menu):
+
+    ###################################################################
+    #
+    ###################################################################
+    def __init__(self, row):
+        wx.Menu.__init__(self)
+
+        self.row = row
+    
+        item = wx.MenuItem(self, wx.NewId(), "Edit")
+        self.AppendItem(item)
+        self.Bind(wx.EVT_MENU, self.OnEditRow, item)
+
+        item = wx.MenuItem(self, wx.NewId(),"Delete")
+        self.AppendItem(item)
+        self.Bind(wx.EVT_MENU, self.OnDeleteRow, item)
+
+        item = wx.MenuItem(self, wx.NewId(),"Add")
+        self.AppendItem(item)
+        self.Bind(wx.EVT_MENU, self.OnAddRow, item)
+
+        self.retval = 0
+    #
+
+
+    ###################################################################
+    #
+    ###################################################################
+    def OnEditRow(self, event):
+        self.retval = 1
+    #
+
+
+    ###################################################################
+    #
+    ###################################################################
+    def OnDeleteRow(self, event):
+        self.retval = 2
+    #
+
+
+    ###################################################################
+    #
+    ###################################################################
+    def OnAddRow(self, event):
+        self.retval = 3
+    #
+
+    ###################################################################
+    #
+    ###################################################################
+    def GetRetval(self):
+        return self.retval
+    #
 #
 
