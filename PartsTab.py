@@ -208,7 +208,14 @@ class PartsTab(gridlib.Grid):
     # Delete part
     ###################################################################
     def DeletePart(self, partNo):
+
         self.db.DelPart(partNo)
+
+        # Make grid one row smaller
+        self.DeleteRows(0, 1)
+
+        # Redraw the grid
+        self.RedrawGrid()
     #
 
     ###################################################################
