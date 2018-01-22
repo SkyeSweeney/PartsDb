@@ -41,10 +41,13 @@ class Part():
         self.fields.append( PartFieldInfo(16, "Location",      "Location",       "TEXT",                True,     "*") )
         self.fields.append( PartFieldInfo(17, "Notes",         "Notes",          "TEXT",                True,     "*") )
 
+        # Determine number of fields
         self.numFields = len(self.fields)
 
+        # Create list of values for each field
         self.values = ["" for x in range(self.numFields)]
 
+        # Set default values
         self.setDefaults()
 
     #
@@ -112,6 +115,48 @@ class Part():
                 retval = retval + '%d' % self.values[iFld] + ","
             else:
                 pass
+            #
+        #
+        retval = retval[:-1]
+        return retval
+    #
+
+    ###################################################################
+    # Create a VALUE entry in SqLite form
+    ###################################################################
+    def makeValue(self):
+
+        retval=""
+
+        # For each field
+        for iFld in range(self.numFields):
+            fld = self.fields[iFld]
+            if ("PRIMARY" not in fld.SqlType):
+                if ("TEXT" in fld.SqlType):
+                    retval = retval + '"%s"' % self.values[iFld] + ","
+                elif ("INTEGER" in fld.SqlType):
+                    retval = retval + '%d' % self.values[iFld] + ","
+                else:
+                    pass
+                #
+            #
+        #
+        retval = retval[:-1]
+        return retval
+    #
+
+    ###################################################################
+    # Create a SELECT string in SqLite form
+    ###################################################################
+    def makeSelect(self):
+
+        retval=""
+
+        # For each field
+        for iFld in range(self.numFields):
+            fld = self.fields[iFld]
+            if ("PRIMARY" not in fld.SqlType):
+                retval = retval + '%s' % fld.SqlName + ","
             #
         #
         retval = retval[:-1]
@@ -224,6 +269,9 @@ if __name__ == "__main__":
     except:
         print "Bad index"
     #
+
+    print p.makeValue()
+    print p.makeSelect()
 
     #print p.exists("aaa")
     #print p.exists("Part #")

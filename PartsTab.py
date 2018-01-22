@@ -6,6 +6,7 @@ import sys
 import types
 
 import PartsDlg 
+import Part
 
 
 #######################################################################
@@ -218,6 +219,20 @@ class PartsTab(gridlib.Grid):
         self.RedrawGrid()
     #
 
+
+    ###################################################################
+    # Add part
+    ###################################################################
+    def AddPart(self):
+
+        part = Part.Part()
+
+        self.db.AddPart(part)
+
+        # Redraw the grid
+        self.RedrawGrid()
+    #
+
     ###################################################################
     # Edit part (and focus on given column)
     ###################################################################
@@ -279,37 +294,44 @@ class PartsTab(gridlib.Grid):
     # On Col is used to hide columns
     ###################################################################
     def OnLabelRightClick(self, evt):
+
         row = evt.GetRow()
         col = evt.GetCol()
 
-        # Right click on column header
+        # Right click on vertical header
         if (col == -1):
-            # Pop up a context menu
+
+            # Pop up a Row context menu
             menu = RowContextMenu(row)
             self.PopupMenu(menu, evt.GetPosition())
             retval = menu.GetRetval()
             menu.Destroy()
 
+            # Uninitialized
             if (retval == 0):
                 print "zip"
-                pass
+
+            # Edit
             elif (retval == 1):
                 partNo = self.GetCellValue(row, 0)
                 self.EditPart(partNo, col)
 
+            # Delete
             elif (retval == 2):
-                print "delete"
                 partNo = self.GetCellValue(row, 0)
                 self.DeletePart(partNo)
 
+            # Add
             elif (retval == 3):
                 print "add"
-                pass
+                self.AddPart()
+
+            # Bad answer
             else:
-                print "zip"
-                pass
+                print "???"
             #
 
+        # Right click on horizontal header
         elif (row == -1):
             pass
 
@@ -317,8 +339,6 @@ class PartsTab(gridlib.Grid):
             pass
         #
        
-        sys.stdout.write("OnLabelRightClick: (%d,%d) %s\n" %
-                       (evt.GetRow(), evt.GetCol(), evt.GetPosition()))
         evt.Skip()
     #
 

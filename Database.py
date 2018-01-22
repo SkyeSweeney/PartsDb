@@ -63,6 +63,7 @@ class Database():
     ###################################################################
     def CreateDataBase(self):  
 
+        # Create the Parts tabel (2N2222A, ADE7763, ...)
         cmd = "CREATE TABLE PartsTbl("
 
         for i in range(self.numPartFields):
@@ -87,12 +88,10 @@ class Database():
         #
         cmd = cmd[:-1] + ")"
 
-        print cmd
-
         self.c.execute(cmd)
         self.conn.commit()
   
-        # Create the Category table (FET, Sensor, ...)
+        # Create the Project table (SailboatTimer, PowerMonitor, ...)
         cmd = "CREATE TABLE ProjectTbl("
 
         for i in range(self.numProjectFields):
@@ -102,8 +101,6 @@ class Database():
             cmd = cmd + "%s %s," % (n, t)
         #
         cmd = cmd[:-1] + ")"
-
-        print cmd
 
         self.c.execute(cmd)
         self.conn.commit()
@@ -220,11 +217,13 @@ class Database():
     #
     ###################################################################
     def AddPart(self, part, commit=True):
+
         if (not self.dbOpen):
             print "DB is not open"
             return
         #
-        cmd = "INSERT INTO PartsTbl VALUES (%s)" % (part.makeRecord())
+        cmd = "INSERT INTO PartsTbl (%s) VALUES (%s)" % (part.makeSelect(), part.makeValue())
+        print cmd
         try:
             self.c.execute(cmd)
             if commit:
@@ -240,6 +239,7 @@ class Database():
     #
     ###################################################################
     def DelPart(self, myPartNum, commit=True):
+
         if (not self.dbOpen):
             print "DB is not open"
             return
