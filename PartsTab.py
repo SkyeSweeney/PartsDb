@@ -153,6 +153,8 @@ class PartsTab(gridlib.Grid):
             iRow = iRow + 1
         #
 
+        return iRow
+
     #
 
     ###################################################################
@@ -225,12 +227,20 @@ class PartsTab(gridlib.Grid):
     ###################################################################
     def AddPart(self):
 
+        # Create a blank part
         part = Part.Part()
 
+        # Add part to database
         self.db.AddPart(part)
 
+        # Add entry in table
+        self.AppendRows(1)
+
         # Redraw the grid
-        self.RedrawGrid()
+        row = self.RedrawGrid()
+        row = 5  # FIXME
+
+        return row
     #
 
     ###################################################################
@@ -323,8 +333,14 @@ class PartsTab(gridlib.Grid):
 
             # Add
             elif (retval == 3):
-                print "add"
-                self.AddPart()
+
+                # Add the part
+                row = self.AddPart()
+
+                # Now force it do be edited
+                partNo = self.GetCellValue(row, 0)
+
+                self.EditPart(partNo, 2)
 
             # Bad answer
             else:
