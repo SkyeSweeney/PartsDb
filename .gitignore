@@ -1,4 +1,5 @@
 *.pyc
 *.swp
 *~
-parts.db
+*.db
+Playground/*.db

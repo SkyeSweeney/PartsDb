@@ -108,6 +108,20 @@ SELECT * from partProject;
 -- Complex selects
 .print
 .print Part with text category
-select part.name, part.description FROM part INNER JOIN category on category.id = part.category;
+SELECT part.name, part.description FROM part INNER JOIN category on category.id = part.category;
 
+
+.print
+.print AAAA
+SELECT part.name, category.name FROM part, category WHERE part.id = category.id;
+
+
+
+.print
+.print BBBB
+SELECT part.name, project.name, category.name 
+FROM part, project, partProject, category 
+WHERE partProject.partId=part.id AND 
+      partProject.projectId=project.id AND 
+      part.category=category.id;
 
