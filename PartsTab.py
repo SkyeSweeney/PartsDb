@@ -238,9 +238,8 @@ class PartsTab(gridlib.Grid):
 
         # Redraw the grid
         row = self.RedrawGrid()
-        row = 5  # FIXME
 
-        return row
+        return row-1
     #
 
     ###################################################################
