@@ -62,9 +62,21 @@ if __name__ == "__main__":
 
     # Create a blank category
     category = Category.Category()
-    category.setFromList([0,"Opto-0","Desc-0","Notes-0"])
+    category.setFromList([0,"Opto","Optical","Notes"])
     db.AddCategory(category)
-    category.setFromList([1,"FETS-1","Desc-1","Notes-1"])
+    category.setFromList([0,"N-FET","Field Effect Transistors","Notes"])
+    db.AddCategory(category)
+    category.setFromList([0,"P-FET","Field Effect Transistors","Notes"])
+    db.AddCategory(category)
+    category.setFromList([0,"N-BJT","Transistors","Notes"])
+    db.AddCategory(category)
+    category.setFromList([0,"P-BJT","Transistors","Notes"])
+    db.AddCategory(category)
+    category.setFromList([0,"Sensor","Sensors","Notes"])
+    db.AddCategory(category)
+    category.setFromList([0,"Resistors","Resistors","Notes"])
+    db.AddCategory(category)
+    category.setFromList([0,"Capacitors","Capacitors","Notes"])
     db.AddCategory(category)
 
 
@@ -72,9 +84,17 @@ if __name__ == "__main__":
 
     # Create a blank project
     project = Project.Project()
-    project.setFromList([0,"SailTimer","Desc-0","Notes-0"])
+    project.setFromList([0,"SailTimer","Desc-0",""])
     db.AddProject(project)
-    project.setFromList([1,"PowerMonitor","Desc-1","Notes-1"])
+    project.setFromList([0,"PowerMonitor","Desc-1",""])
+    db.AddProject(project)
+    project.setFromList([0,"GE-Clock","Pitch augmentation computer clock",""])
+    db.AddProject(project)
+    project.setFromList([0,"Lightning Detector","",""])
+    db.AddProject(project)
+    project.setFromList([0,"Field Mill","",""])
+    db.AddProject(project)
+    project.setFromList([0,"Workout Buddy","",""])
     db.AddProject(project)
 
 

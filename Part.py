@@ -109,6 +109,8 @@ class Part():
         # For each field
         for iFld in range(self.numFields):
             fld = self.fields[iFld]
+            if ("KEY" in fld.SqlType):
+                retval = retval + 'null' + ","
             if ("TEXT" in fld.SqlType):
                 retval = retval + '"%s"' % self.values[iFld] + ","
             elif ("INTEGER" in fld.SqlType):

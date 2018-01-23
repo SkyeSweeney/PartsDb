@@ -104,6 +104,17 @@ class Database():
 
         self.c.execute(cmd)
         self.conn.commit()
+
+        # Create the PartsProject table (Joins parts and projects)
+        cmd = "CREATE    TABLE Parts2Projects("\
+              "id        INTEGER PRIMARY KEY,"\
+	      "partId    INTEGER,"\
+	      "projectId INTEGER,"\
+	      "FOREIGN KEY(partId)    REFERENCES part(id),"\
+	      "FOREIGN KEY(projectId) REFERENCES project(id))"
+
+        self.c.execute(cmd)
+        self.conn.commit()
     #
   
     ###################################################################
@@ -223,7 +234,6 @@ class Database():
             return
         #
         cmd = "INSERT INTO PartsTbl (%s) VALUES (%s)" % (part.makeSelect(), part.makeValue())
-        print cmd
         try:
             self.c.execute(cmd)
             if commit:

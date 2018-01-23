@@ -92,7 +92,9 @@ class Category():
         # For each field
         for iFld in range(self.numFields):
             fld = self.fields[iFld]
-            if ("TEXT" in fld.SqlType):
+            if ("KEY" in fld.SqlType):
+                retval = retval + 'null' + ","
+            elif ("TEXT" in fld.SqlType):
                 retval = retval + '"%s"' % self.values[iFld] + ","
             elif ("INTEGER" in fld.SqlType):
                 retval = retval + '%d' % self.values[iFld] + ","
@@ -187,6 +189,7 @@ if __name__ == "__main__":
     print p
 
     # Print as an SQL cmd
+    print "make record"
     print p.makeRecord()
 
     # Populate the category from a list
