@@ -18,7 +18,7 @@ class PartsDlg(wx.Dialog):
                  parent, 
                  ID, 
                  title, 
-                 partNo,
+                 partId,
                  selectedCol,
                  db,
                  size=wx.DefaultSize, 
@@ -27,7 +27,7 @@ class PartsDlg(wx.Dialog):
                  ):
 
         self.db = db
-        self.partNo = partNo
+        self.partId = partId
 
         wx.Dialog.__init__(self, 
                            None, 
@@ -36,7 +36,7 @@ class PartsDlg(wx.Dialog):
                            style=wx.DEFAULT_DIALOG_STYLE|wx.THICK_FRAME|wx.RESIZE_BORDER|wx.TAB_TRAVERSAL)
 
         # Get the part data for this row
-        rows = self.db.GetPartBy("PartNo", self.partNo)
+        rows = self.db.GetPartByFieldValue("PartId", self.partId)
 
         if (len(rows) != 1):
             print "Invalid results"

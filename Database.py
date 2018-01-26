@@ -734,41 +734,51 @@ class Database():
 
     ###################################################################
     # Add a project ID to a part
+    # Return the entry ID or 0 for error
     ###################################################################
     def AddProjectToPart(self, partId, projectId):
 
         if (not self.dbOpen):
             print "DB is not open"
-            return
+            return 0
         #
 
-        # Create command
-        cmd = "INSERT INTO Part2Project (Id,PartId,ProjectId) VALUES (null, %d, %d)" % (partId, projectId)
+        if (projectId == 0):
+            print "Project ID is invalid"
+            return 0
 
-        # Execute the command
-        try:
-            self.c.execute(cmd)
-            self.conn.commit()
-        except sqlite3.Error as e:
-            print __name__, e.args[0]
+        else:
+
+            # Create command
+            cmd = "INSERT INTO Part2Project (Id,PartId,ProjectId) VALUES (null, %d, %d)" % (partId, projectId)
+
+            # Execute the command
+            try:
+                self.c.execute(cmd)
+                self.conn.commit()
+            except sqlite3.Error as e:
+                print __name__, e.args[0]
+            #
+            return self.c.lastrowid
         #
-        return self.c.lastrowid
     #
 
 
     ###################################################################
     #
+    # Return the entry ID or 0 for error
     ###################################################################
     def AddCategoryToPart(self, partId, categoryId):
 
         if (not self.dbOpen):
             print "DB is not open"
-            return
+            return 0
         #
 
         if (categoryId == 0):
-            print "Category ID is invalid")
+            print "Category ID is invalid"
             return 0
+
         else:
 
             # Create command
@@ -897,18 +907,18 @@ if __name__ == "__main__":
 
     # 2N2222A
     part.setFromList((0,
-                     "//file:/masterdocs/skye/datasheets/transistors/2N2222A.pdf",
+                     "2N2222A",
+                     "NPN transistor",
+                     "33",
+                     "5",
+                     "Blue bin",
                      "Fairchild",
                      "2N2222A",
                      "www.fairchild.com/ddd",
                      "digikey",
                      "2N2222A-ND",
                      "www.digikey.com/kdkdkdk",
-                     "33",
-                     "5",
-                     "2N2222A",
-                     "NPN transistor",
-                     "Blue bin",
+                     "//file:/masterdocs/skye/datasheets/transistors/2N2222A.pdf",
                      "None"))
     partId = db.AddPart(part, commit=False)
     print "new part", partId
@@ -921,18 +931,18 @@ if __name__ == "__main__":
 
     # Arduino Uno
     part.setFromList((0,
-                     "//file:/masterdocs/skye/datasheets/transistors/2N2222A.pdf",
-                     "Arduino",
+                     "Arduino Uno",
+                     "Arduino Uno",
+                     "4",
+                     "1",
+                     "Blue bin",
+                     "Arduino Company",
                      "Arduino Uno",
                      "www.arduino.cc",
                      "Spakfun",
-                     "xyxyxyx",
+                     "P-0032",
                      "www.sparkfun.com/kdkdkdk",
-                     "4",
-                     "1",
-                     "Arduino Uno",
-                     "Microprocessor",
-                     "Blue bin",
+                     "//file:/masterdocs/skye/datasheets/transistors/2N2222A.pdf",
                      "None"))
     partId = db.AddPart(part, commit=False)
     print "new part", partId
