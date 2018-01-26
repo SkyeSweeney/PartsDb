@@ -22,8 +22,8 @@ class Project():
         self.fields = []
 
         #                                      Id, SqlName          HumanName,        SqlType                Editable   DefaultVal
-        self.fields.append( ProjectFieldInfo (0,  "ProjectNo",    "Project #",     "INTEGER PRIMARY KEY", False,    0) )
-        self.fields.append( ProjectFieldInfo (1,  "Title",         "Title",          "TEXT",                True,     "*") )
+        self.fields.append( ProjectFieldInfo (0,  "ProjectId",     "Project #",      "INTEGER PRIMARY KEY", False,    0) )
+        self.fields.append( ProjectFieldInfo (1,  "Name",          "Name",           "TEXT",                True,     "*") )
         self.fields.append( ProjectFieldInfo (2,  "Description",   "Description",    "TEXT",                True,     "*") )
         self.fields.append( ProjectFieldInfo (3,  "Notes",         "Notes",          "TEXT",                True,     "*") )
 

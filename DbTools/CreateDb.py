@@ -22,43 +22,16 @@ if __name__ == "__main__":
         os.remove("parts.db")
     except:
         pass
+    #
 
     # Open the database
     db = Database.Database()
     db.OpenDataBase("Parts.db")  
 
-    # Create a blank part
-    part = Part.Part()
 
-    # Start a transaction
-    db.StartTransaction()
-
-    # add a few sample records
-    for iRow in range(30):
-
-        # for each field in part
-        for iFld in range(part.getNumFields()):
-
-            t = part.getFieldInfo(iFld).SqlType   # Type
-            n = part.getFieldInfo(iFld).SqlName   # Sql Name
-
-            if ("TEXT" in t):
-                part.setValueByIndex(iFld, "F-%s-%d"%(n,iRow))
-            elif ("INTEGER" in t):
-                part.setValueByIndex(iFld, iRow)
-            else:
-                pass
-            #
-
-        #
-        db.AddPart(part, commit=False)
-    #
-
-    db.EndTransaction()
-
-
-
+    ###############################
     # Add some Categories to the DB
+    ###############################
 
     # Create a blank category
     category = Category.Category()
@@ -78,9 +51,19 @@ if __name__ == "__main__":
     db.AddCategory(category)
     category.setFromList([0,"Capacitors","Capacitors","Notes"])
     db.AddCategory(category)
+    category.setFromList([0,"Small Signal Diodes","Diodes","Notes"])
+    db.AddCategory(category)
+    category.setFromList([0,"Power Diodes","Diodes","Notes"])
+    db.AddCategory(category)
+    category.setFromList([0,"Processors","Processors","Notes"])
+    db.AddCategory(category)
+    category.setFromList([0,"Memory","Memory","Notes"])
+    db.AddCategory(category)
 
 
+    #############################
     # Add some Projects to the DB
+    #############################
 
     # Create a blank project
     project = Project.Project()
@@ -96,6 +79,36 @@ if __name__ == "__main__":
     db.AddProject(project)
     project.setFromList([0,"Workout Buddy","",""])
     db.AddProject(project)
+    project.setFromList([0,"PID Demo","",""])
+    db.AddProject(project)
+
+    ################################
+    # Add some parts to the database
+    ################################
+
+    # Create a blank part
+    part = Part.Part()
+
+    # 2N2222A
+    part.setFromList(0,
+                     "//file:/masterdocs/skye/datasheets/transistors/2N2222A.pdf",
+                     "Fairchild",
+                     "2N2222A",
+                     "www.fairchild.com/ddd",
+                     "digikey",
+                     "2N2222A-ND",
+                     "www.digikey.com/kdkdkdk",
+                     "33",
+                     "5",
+                     "2N2222A",
+                     "NPN transistor",
+                     "Blue bin",
+                     "None")
+    id = db.AddPart(part, commit=False)
+    # Add Category(s)
+    db.AddCategory(id, "NPN transistor")
+    # Add Project(s)
+    db.AddProject(id, "Sail Timer")
 
 
     # Close the database

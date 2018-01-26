@@ -22,8 +22,8 @@ class Category():
         self.fields = []
 
         #                                      Id, SqlName          HumanName,        SqlType                Editable   DefaultVal
-        self.fields.append( CategoryFieldInfo (0,  "CategoryNo",    "Category #",     "INTEGER PRIMARY KEY", False,    0) )
-        self.fields.append( CategoryFieldInfo (1,  "Title",         "Title",          "TEXT",                True,     "*") )
+        self.fields.append( CategoryFieldInfo (0,  "CategoryId",    "Category #",     "INTEGER PRIMARY KEY", False,    0) )
+        self.fields.append( CategoryFieldInfo (1,  "Name",          "Name",           "TEXT",                True,     "*") )
         self.fields.append( CategoryFieldInfo (2,  "Description",   "Description",    "TEXT",                True,     "*") )
         self.fields.append( CategoryFieldInfo (3,  "Notes",         "Notes",          "TEXT",                True,     "*") )
 

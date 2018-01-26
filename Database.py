@@ -7,6 +7,9 @@ import Part
 import Category
 import Project
 
+import sys
+import os
+
 
 
 #######################################################################
@@ -105,22 +108,34 @@ class Database():
         self.c.execute(cmd)
         self.conn.commit()
 
-        # Create the PartsProject table (Joins parts and projects)
-        cmd = "CREATE    TABLE Parts2Projects("\
-              "id        INTEGER PRIMARY KEY,"\
-	      "partId    INTEGER,"\
-	      "projectId INTEGER,"\
-	      "FOREIGN KEY(partId)    REFERENCES part(id),"\
-	      "FOREIGN KEY(projectId) REFERENCES project(id))"
+        # Create the Parts2Project table (Joins parts and projects)
+        cmd = "CREATE    TABLE Part2Project("\
+              "Id        INTEGER PRIMARY KEY,"\
+	      "PartId    INTEGER,"\
+	      "ProjectId INTEGER,"\
+	      "FOREIGN KEY(partId)    REFERENCES part(PartId),"\
+	      "FOREIGN KEY(projectId) REFERENCES project(ProjectId))"
+
+        self.c.execute(cmd)
+        self.conn.commit()
+
+        # Create the Part2Category table (Joins parts and categories)
+        cmd = "CREATE     TABLE Part2Category("\
+              "Id         INTEGER PRIMARY KEY,"\
+	      "PartId     INTEGER,"\
+	      "CategoryId INTEGER,"\
+	      "FOREIGN KEY(partId)     REFERENCES PartTbl(PartId),"\
+	      "FOREIGN KEY(categoryId) REFERENCES CategoryTbl(CategoryId))"
 
         self.c.execute(cmd)
         self.conn.commit()
     #
   
     ###################################################################
-    #
+    # Close the database
     ###################################################################
     def CloseDataBase(self):  
+
         if (not self.dbOpen):
             print "DB is not open"
             return
@@ -130,9 +145,10 @@ class Database():
     #
   
     ###################################################################
-    #
+    # Start a transaction
     ###################################################################
     def StartTransaction(self):
+
         if (not self.dbOpen):
             print "DB is not open"
             return
@@ -146,9 +162,10 @@ class Database():
     #
   
     ###################################################################
-    #
+    # Close a transaction
     ###################################################################
     def EndTransaction(self):
+
         if (not self.dbOpen):
             print "DB is not open"
             return
@@ -163,9 +180,10 @@ class Database():
   
   
     ###################################################################
-    #
+    # Abort a transaction
     ###################################################################
     def AbortTransaction(self):
+
         if (not self.dbOpen):
             print "DB is not open"
             return
@@ -183,9 +201,10 @@ class Database():
 
   
     ###################################################################
-    #
+    # Get a list of all parts
     ###################################################################
     def GetAllParts(self):
+
         if (not self.dbOpen):
             print "DB is not open"
             return
@@ -204,9 +223,10 @@ class Database():
     #
   
     ###################################################################
-    #
+    # Get a part by a given field name and its value
     ###################################################################
-    def GetPartBy(self, field, value):
+    def GetPartByFieldValue(self, field, value):
+
         if (not self.dbOpen):
             print "DB is not open"
             return
@@ -225,28 +245,36 @@ class Database():
     #
   
     ###################################################################
-    #
+    # Add a new part
+    # Return the id of this new part
     ###################################################################
     def AddPart(self, part, commit=True):
+        retval = 0
 
         if (not self.dbOpen):
             print "DB is not open"
             return
         #
+
         cmd = "INSERT INTO PartsTbl (%s) VALUES (%s)" % (part.makeSelect(), part.makeValue())
         try:
             self.c.execute(cmd)
             if commit:
                 self.conn.commit()
             #
+            retval = self.c.lastrowid
             
         except sqlite3.Error as e:
             print __name__, e.args[0]
+            retval = 0
         #
+
+        return retval
+
     #
   
     ###################################################################
-    #
+    # Delete a part
     ###################################################################
     def DelPart(self, myPartNum, commit=True):
 
@@ -266,7 +294,7 @@ class Database():
     #
   
     ###################################################################
-    #
+    # Update a part from a full list
     ###################################################################
     def UpdatePart(self, myPartNum, lst, commit=True):
 
@@ -334,6 +362,7 @@ class Database():
             print "DB is not open"
             return
         #
+
         cmd = "SELECT * FROM CategoryTbl;"
         try:
             rows = []
@@ -350,13 +379,14 @@ class Database():
     ###################################################################
     #
     ###################################################################
-    def GetCategoryBy(self, field, value):
+    def GetCategoryByFieldValue(self, field, value):
 
         if (not self.dbOpen):
             print "DB is not open"
             return
         #
-        cmd = "SELECT * FROM CategoryTbl WHERE %s == %s" % (field, str(value))
+
+        cmd = "SELECT * FROM CategoryTbl WHERE %s == '%s'" % (field, str(value))
         try:
             rows = []
             for row in self.c.execute(cmd):
@@ -370,7 +400,46 @@ class Database():
     #
   
     ###################################################################
+    # Get a Category ID by its name
+    ###################################################################
+    def GetCategoryIdByName(self, name):
+
+        retval = 0
+
+        if (not self.dbOpen):
+            print "DB is not open"
+            return
+        #
+
+        cmd = "SELECT CategoryId FROM CategoryTbl WHERE name == '%s'" % (name)
+        try:
+            rows = []
+            result = self.c.execute(cmd)
+            for row in result:
+                rows.append(row)
+            #
+        except sqlite3.Error as e:
+            print "qqq", e.args[0]
+            retval = 0
+        #
+
+        # Insure we only got one and only one answer
+        if (len(rows) == 0):
+            print "Category", name, "not found"
+            retval = 0
+        elif (len(rows) > 1):
+            print "Category", name, "found more than once"
+            retval = 0
+        else:
+            retval = rows[0][0]
+        #
+
+        return retval  
     #
+  
+    ###################################################################
+    # Add a new category
+    # Return new ID
     ###################################################################
     def AddCategory(self, category, commit=True):
 
@@ -384,14 +453,18 @@ class Database():
             if commit:
                 self.conn.commit()
             #
+            retval = self.c.lastrowid
             
         except sqlite3.Error as e:
             print __name__, e.args[0]
+            retval = 0
         #
+
+        return retval
     #
   
     ###################################################################
-    #
+    # Delete a category by id
     ###################################################################
     def DelCategory(self, myCategoryNo, commit=True):
 
@@ -411,7 +484,7 @@ class Database():
     #
   
     ###################################################################
-    #
+    # Update a category with a full list
     ###################################################################
     def UpdateCategory(self, myCategoryNo, lst, commit=True):
 
@@ -471,7 +544,7 @@ class Database():
 
   
     ###################################################################
-    #
+    # Get a list of all projects
     ###################################################################
     def GetAllProjects(self):
 
@@ -479,6 +552,7 @@ class Database():
             print "DB is not open"
             return
         #
+
         cmd = "SELECT * FROM ProjectTbl;"
         try:
             rows = []
@@ -493,9 +567,9 @@ class Database():
     #
   
     ###################################################################
-    #
+    # Get a project by a filed and value
     ###################################################################
-    def GetProjectBy(self, field, value):
+    def GetProjectByFieldValue(self, field, value):
 
         if (not self.dbOpen):
             print "DB is not open"
@@ -514,8 +588,46 @@ class Database():
         return rows  
     #
   
+  
     ###################################################################
     #
+    ###################################################################
+    def GetProjectIdByName(self, name):
+
+        retval = 0
+
+        if (not self.dbOpen):
+            print "DB is not open"
+            return
+        #
+
+        cmd = "SELECT ProjectId FROM ProjectTbl WHERE name == '%s'" % (name)
+        try:
+            rows = []
+            result = self.c.execute(cmd)
+            for row in result:
+                rows.append(row)
+            #
+        except sqlite3.Error as e:
+            print "rrr", e.args[0]
+            retval = 0
+        #
+
+        # Insure we only got one and only one answer
+        if (len(rows) == 0):
+            retval = 0
+        elif (len(rows) > 1):
+            retval = 0
+        else:
+            retval = rows[0][0]
+        #
+
+        return retval  
+    #
+  
+    ###################################################################
+    # Add a project
+    # Return the new ID
     ###################################################################
     def AddProject(self, project, commit=True):
 
@@ -523,20 +635,24 @@ class Database():
             print "DB is not open"
             return
         #
+
         cmd = "INSERT INTO ProjectTbl VALUES (%s)" % (project.makeRecord())
         try:
             self.c.execute(cmd)
             if commit:
                 self.conn.commit()
             #
+            retval = self.c.lastrowid
             
         except sqlite3.Error as e:
             print __name__, e.args[0]
+            retval = 0
         #
+        return retval
     #
   
     ###################################################################
-    #
+    # Delete a project
     ###################################################################
     def DelProject(self, myProjectNo, commit=True):
 
@@ -544,6 +660,7 @@ class Database():
             print "DB is not open"
             return
         #
+
         cmd = "DELETE FROM ProjectTbl WHERE ProjectNo=%s" % (myProjectNo)
         try:
             self.c.execute(cmd)
@@ -556,7 +673,7 @@ class Database():
     #
   
     ###################################################################
-    #
+    # Update a project from a full list
     ###################################################################
     def UpdateProject(self, myProjectNo, lst, commit=True):
 
@@ -610,5 +727,226 @@ class Database():
     def GetProjectFieldInfo(self, i):  
         return self.templateProject.getFieldInfo(i)
     #
+
+
+
+
+
+    ###################################################################
+    # Add a project ID to a part
+    ###################################################################
+    def AddProjectToPart(self, partId, projectId):
+
+        if (not self.dbOpen):
+            print "DB is not open"
+            return
+        #
+
+        # Create command
+        cmd = "INSERT INTO Part2Project (Id,PartId,ProjectId) VALUES (null, %d, %d)" % (partId, projectId)
+
+        # Execute the command
+        try:
+            self.c.execute(cmd)
+            self.conn.commit()
+        except sqlite3.Error as e:
+            print __name__, e.args[0]
+        #
+        return self.c.lastrowid
+    #
+
+
+    ###################################################################
+    #
+    ###################################################################
+    def AddCategoryToPart(self, partId, categoryId):
+
+        if (not self.dbOpen):
+            print "DB is not open"
+            return
+        #
+
+        if (categoryId == 0):
+            print "Category ID is invalid")
+            return 0
+        else:
+
+            # Create command
+            cmd = "INSERT INTO Part2Category (Id,PartId,CategoryId) VALUES (null, %d, %d)" % (partId, categoryId)
+
+            # Execute the command
+            try:
+                self.c.execute(cmd)
+                self.conn.commit()
+            except sqlite3.Error as e:
+                print __name__, e.args[0]
+            #
+            return self.c.lastrowid
+        #
+    #
+
+
+    ###################################################################
+    #
+    ###################################################################
+    def DeleteProjectFromPart(self, partId, ProjectId):
+        pass
+    #
+
+
+    ###################################################################
+    #
+    ###################################################################
+    def DeleteCategoryFromPart(self, partId, CategoryId):
+        pass
+    #
+
+
+    ###################################################################
+    #
+    ###################################################################
+    def GetPartCategories(self, partId):
+        pass
+    #
+
+
+    ###################################################################
+    #
+    ###################################################################
+    def GetPartProjects(self, partId):
+        pass
+    #
   
 #
+
+
+
+if __name__ == "__main__":
+
+    # Delete the SQlite database file if it exists
+    try:
+        os.remove("parts.db")
+    except:
+        pass
+    #
+
+    # Open the database
+    db = Database()
+    db.OpenDataBase("Parts.db")  
+
+
+    ###############################
+    # Add some Categories to the DB
+    ###############################
+
+    # Create a blank category
+    category = Category.Category()
+    category.setFromList([0,"Opto","Optical","Notes"])
+    db.AddCategory(category)
+    category.setFromList([0,"N-FET","Field Effect Transistors","Notes"])
+    db.AddCategory(category)
+    category.setFromList([0,"P-FET","Field Effect Transistors","Notes"])
+    db.AddCategory(category)
+    category.setFromList([0,"NPN Transistor","Transistors","Notes"])
+    db.AddCategory(category)
+    category.setFromList([0,"PNP Transistor","Transistors","Notes"])
+    db.AddCategory(category)
+    category.setFromList([0,"Sensor","Sensor","Notes"])
+    db.AddCategory(category)
+    category.setFromList([0,"Resistor","Resistor","Notes"])
+    db.AddCategory(category)
+    category.setFromList([0,"Capacitor","Capacitor","Notes"])
+    db.AddCategory(category)
+    category.setFromList([0,"Small Signal Diode","Diodes","Notes"])
+    db.AddCategory(category)
+    category.setFromList([0,"Power Diode","Diodes","Notes"])
+    db.AddCategory(category)
+    category.setFromList([0,"Processor","Processor","Notes"])
+    db.AddCategory(category)
+    category.setFromList([0,"Memory","Memory","Notes"])
+    db.AddCategory(category)
+
+
+    #############################
+    # Add some Projects to the DB
+    #############################
+
+    # Create a blank project
+    project = Project.Project()
+    project.setFromList([0,"Sail Timer","Desc-0",""])
+    db.AddProject(project)
+    project.setFromList([0,"Power Monitor","Desc-1",""])
+    db.AddProject(project)
+    project.setFromList([0,"GE Clock","Pitch augmentation computer clock",""])
+    db.AddProject(project)
+    project.setFromList([0,"Lightning Detector","",""])
+    db.AddProject(project)
+    project.setFromList([0,"Field Mill","",""])
+    db.AddProject(project)
+    project.setFromList([0,"Workout Buddy","",""])
+    db.AddProject(project)
+    project.setFromList([0,"PID Demo","",""])
+    db.AddProject(project)
+
+    ################################
+    # Add some parts to the database
+    ################################
+
+    # Create a blank part
+    part = Part.Part()
+
+    # 2N2222A
+    part.setFromList((0,
+                     "//file:/masterdocs/skye/datasheets/transistors/2N2222A.pdf",
+                     "Fairchild",
+                     "2N2222A",
+                     "www.fairchild.com/ddd",
+                     "digikey",
+                     "2N2222A-ND",
+                     "www.digikey.com/kdkdkdk",
+                     "33",
+                     "5",
+                     "2N2222A",
+                     "NPN transistor",
+                     "Blue bin",
+                     "None"))
+    partId = db.AddPart(part, commit=False)
+    print "new part", partId
+
+    # Add Category(s)
+    db.AddCategoryToPart(partId, db.GetCategoryIdByName("NPN Transistor"))
+
+    # Add Project(s)
+    db.AddProjectToPart(partId, db.GetProjectIdByName("Sail Timer"))
+
+    # Arduino Uno
+    part.setFromList((0,
+                     "//file:/masterdocs/skye/datasheets/transistors/2N2222A.pdf",
+                     "Arduino",
+                     "Arduino Uno",
+                     "www.arduino.cc",
+                     "Spakfun",
+                     "xyxyxyx",
+                     "www.sparkfun.com/kdkdkdk",
+                     "4",
+                     "1",
+                     "Arduino Uno",
+                     "Microprocessor",
+                     "Blue bin",
+                     "None"))
+    partId = db.AddPart(part, commit=False)
+    print "new part", partId
+
+    # Add Category(s)
+    db.AddCategoryToPart(partId, db.GetCategoryIdByName("Processor"))
+
+    # Add Project(s)
+    db.AddProjectToPart(partId, db.GetProjectIdByName("Power Monitor"))
+    db.AddProjectToPart(partId, db.GetProjectIdByName("Field Mill"))
+
+
+    # Close the database
+    db.CloseDataBase()  
+
+    print "Done"
+
