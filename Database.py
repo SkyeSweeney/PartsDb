@@ -76,7 +76,6 @@ class Database():
             cmd = cmd + "%s %s," % (n, t)
         #
         cmd = cmd[:-1] + ")"
-        print cmd
 
         self.c.execute(cmd)
         self.conn.commit()
@@ -218,7 +217,7 @@ class Database():
                 rows.append(row)
             #
         except sqlite3.Error as e:
-            print e.args[0]
+            print __name__, e.args[0]
         #
 
         return rows  
@@ -240,7 +239,7 @@ class Database():
                 rows.append(row)
             #
         except sqlite3.Error as e:
-            print e.args[0]
+            print __name__, e.args[0]
         #
 
         return rows  
@@ -284,7 +283,7 @@ class Database():
             print "DB is not open"
             return
         #
-        cmd = "DELETE FROM PartsTbl WHERE PartNo=%s" % (myPartNum)
+        cmd = "DELETE FROM PartsTbl WHERE PartId=%s" % (myPartNum)
         try:
             self.c.execute(cmd)
             if commit:
@@ -316,7 +315,7 @@ class Database():
             #
         #
         setStr = setStr[:-1]
-        cmd = "UPDATE PartsTbl %s WHERE PartNo=%s" % (setStr,myPartNum)
+        cmd = "UPDATE PartsTbl %s WHERE PartId=%s" % (setStr,myPartNum)
 
         # Execute the command
         try:
@@ -366,7 +365,7 @@ class Database():
                 rows.append(row)
             #
         except sqlite3.Error as e:
-            print e.args[0]
+            print __name__, e.args[0]
         #
 
         return rows  
@@ -389,7 +388,7 @@ class Database():
                 rows.append(row)
             #
         except sqlite3.Error as e:
-            print e.args[0]
+            print __name__, e.args[0]
         #
 
         return rows  
@@ -415,7 +414,7 @@ class Database():
                 rows.append(row)
             #
         except sqlite3.Error as e:
-            print "qqq", e.args[0]
+            print __name__, e.args[0]
             retval = 0
         #
 
@@ -556,7 +555,7 @@ class Database():
                 rows.append(row)
             #
         except sqlite3.Error as e:
-            print e.args[0]
+            print __name__, e.args[0]
         #
 
         return rows  
@@ -578,7 +577,7 @@ class Database():
                 rows.append(row)
             #
         except sqlite3.Error as e:
-            print e.args[0]
+            print __name__, e.args[0]
         #
 
         return rows  
@@ -605,7 +604,7 @@ class Database():
                 rows.append(row)
             #
         except sqlite3.Error as e:
-            print "rrr", e.args[0]
+            print __name__, e.args[0]
             retval = 0
         #
 

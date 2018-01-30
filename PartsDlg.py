@@ -52,20 +52,20 @@ class PartsDlg(wx.Dialog):
         vSizer = wx.BoxSizer(wx.VERTICAL)
 
         # Get list of all fields
-        flds = self.db.GetPartAllFieldInfo()
+        part = self.db.GetPartTemplate()
 
         self.values = []
 
         # For each field in the part
-        for iFld in range(len(flds)):
+        for iFld in range(self.db.GetNumPartFields()):
 
             # Create a sizer for row
             hSizer = wx.BoxSizer(wx.HORIZONTAL)
 
             # Create label for field name
-            label = wx.StaticText(self, -1, flds[iFld].HumanName)
+            label = wx.StaticText(self, -1, part.humanNames[iFld])
 
-            if (flds[iFld].Editable):
+            if (part.editables[iFld]):
                 st = 0
             else:
                 st = wx.TE_READONLY
@@ -124,15 +124,15 @@ class PartsDlg(wx.Dialog):
         retval = []
 
         # Get list of all fields
-        flds = self.db.GetPartAllFieldInfo()
+        part = self.db.GetPartTemplate()
 
         # For each field in the part
-        for iFld in range(len(flds)):
+        for iFld in range(self.db.GetNumPartFields()):
 
             val = self.values[iFld].GetValue()
 
             # Create item to hold value
-            if (type(flds[iFld].SqlType) is types.IntType):
+            if (type(part.sqlTypes[iFld]) is types.IntType):
                 retval.append(int(val))
             else:
                 retval.append(val)

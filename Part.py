@@ -33,18 +33,18 @@ class Part():
                            "Datasheet",
                            "Notes"]
 
-        self.humanNames = ["Part #",
+        self.humanNames = ["PartId",
                            "Name",
                            "Description",
                            "Quantity",
                            "Min",
                            "Location",
                            "Mfg",
-                           "Mfg Part #",
-                           "Mfg Website",
+                           "MfgPartNo",
+                           "MfgWebsite",
                            "Vendor",
-                           "Vendor Part #",
-                           "Vendor Website",
+                           "VendorPartNo",
+                           "VendorWebsite",
                            "Datasheet",
                            "Notes"]
 

@@ -87,7 +87,6 @@ class PartsTab(gridlib.Grid):
     def AppendRecord(self, lst):
         self.AppendRows(1)
         row = self.GetNumberRows() - 1
-        print "appending"
         self.UpdateRecord(row, lst)
     #
 
@@ -115,12 +114,10 @@ class PartsTab(gridlib.Grid):
     # Update a record
     ###################################################################
     def UpdateRecord(self, row, lst):
-        print "update", row, lst
         for col in range(len(lst)):
             if (type(lst[col]) is types.IntType):
                 self.SetCellValue(row, col,  str(lst[col]))
             else:
-                print lst[col]
                 self.SetCellValue(row, col,  lst[col])
             #
         #
