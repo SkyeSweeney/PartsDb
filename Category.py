@@ -15,21 +15,19 @@ class Category():
     ###################################################################
     def __init__(self):
 
-        # Create a named tuple type
-        CategoryFieldInfo = collections.namedtuple("CategoryFieldInfo", ["Id", "SqlName", "HumanName", "SqlType", "Editable", "DefaultVal"])
+        self.humanNames = ["CategoryId", "Name", "Description", "Notes"]
 
-        # Create a list of information about each field
-        self.fields = []
+        self.sqlNames = ["Category #", "Name", "Description", "Notes"]
 
-        #                                      Id, SqlName          HumanName,        SqlType                Editable   DefaultVal
-        self.fields.append( CategoryFieldInfo (0,  "CategoryId",    "Category #",     "INTEGER PRIMARY KEY", False,    0) )
-        self.fields.append( CategoryFieldInfo (1,  "Name",          "Name",           "TEXT",                True,     "*") )
-        self.fields.append( CategoryFieldInfo (2,  "Description",   "Description",    "TEXT",                True,     "*") )
-        self.fields.append( CategoryFieldInfo (3,  "Notes",         "Notes",          "TEXT",                True,     "*") )
+        self.sqlTypes = ["INTEGER PRIMARY KEY", "TEXT", "TEXT", "TEXT"]
 
-        self.numFields = len(self.fields)
+        self.editables = [False, True, True, True]
 
-        self.values = ["" for x in range(self.numFields)]
+        self.defaults = [0, "*", "*", "*"]
+
+        self.values = []
+
+        self.numFields = len(self.humanNames)
 
         self.setDefaults()
 
@@ -40,11 +38,8 @@ class Category():
     ###################################################################
     def setDefaults(self):
 
-        # For each field
-        for fld in self.fields:
-            self.values[fld.Id] = fld.DefaultVal
-        #
-
+        # Do a deep copy
+        self.values = self.defaults[:]
     #
 
 
@@ -56,7 +51,7 @@ class Category():
         # For each field
         for iFld in range(self.numFields):
             fld = self.fields[iFld]
-            self.values[fld.Id] = lst[iFld]
+            self.values[ifld] = lst[iFld]
         #
 
     #
@@ -70,10 +65,9 @@ class Category():
 
         # For each field
         for iFld in range(self.numFields):
-            fld = self.fields[iFld]
-            if ("TEXT" in fld.SqlType):
+            if ("TEXT" in self.sqlTypes[iFld]):
                 retval = retval + '"%s"' % self.values[iFld] + ","
-            elif ("INTEGER" in fld.SqlType):
+            elif ("INTEGER" in self.sqlTypes[iFld]):
                 retval = retval + '%d' % self.values[iFld] + ","
             else:
                 pass
@@ -91,10 +85,9 @@ class Category():
 
         # For each field
         for iFld in range(self.numFields):
-            fld = self.fields[iFld]
-            if ("KEY" in fld.SqlType):
+            if ("KEY" in self.sqlTypes[iFld]):
                 retval = retval + 'null' + ","
-            elif ("TEXT" in fld.SqlType):
+            elif ("TEXT" in self.sqlTypes[iFld]):
                 retval = retval + '"%s"' % self.values[iFld] + ","
             elif ("INTEGER" in fld.SqlType):
                 retval = retval + '%d' % self.values[iFld] + ","
@@ -107,31 +100,13 @@ class Category():
     #
 
     ###################################################################
-    # Get list of field info of nth field
-    ###################################################################
-    def getFieldInfo(self, n):
-        try:
-            return self.fields[n]
-        except:
-            raise IndexError()
-        #
-    #
-
-    ###################################################################
-    # Get list of all fields
-    ###################################################################
-    def getAllFieldInfo(self):
-        return self.fields
-    #
-
-    ###################################################################
     # Get value by index
     ###################################################################
     def getValueByIndex(self,n):
         try:
-            v = self.values[self.fields[n].Id]
+            v = self.values[n]
         except:
-            print "Invalid index"
+            print "Invalid index in getValueByIndex"
             raise IndexError()
         #
         return v
@@ -142,7 +117,7 @@ class Category():
     ###################################################################
     def setValueByIndex(self, n, val):
         try:
-            self.values[self.fields[n].Id] = val
+            self.values[n] = val
         except:
             print "Invalid index in setValueByIndex"
             raise IndexError()
@@ -156,18 +131,6 @@ class Category():
         return self.numFields
     #
 
-
-    ###################################################################
-    # Does the field name exist
-    ###################################################################
-    def exists(self, fld):
-        for field in self.fields:
-            if (fld == field.SqlName) or (fld == field.HumanName):
-                return True
-            #
-        #
-        return False
-    #
 #
 
     

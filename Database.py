@@ -517,21 +517,14 @@ class Database():
     # 
     ###################################################################
     def GetNumCategoryFields(self):  
-        return self.numCategoryFields
+        return self.numPartFields
     #
 
     ###################################################################
     # Get all a list of field info for all parts
     ###################################################################
-    def GetCategoryAllFieldInfo(self):  
-        return self.templateCategory.getAllFieldInfo()
-    #
-
-    ###################################################################
-    # Get field info for a given field
-    ###################################################################
-    def GetCategoryFieldInfo(self, i):  
-        return self.templateCategory.getFieldInfo(i)
+    def GetCategoryTemplate(self):  
+        return self.templatePart
     #
 
 

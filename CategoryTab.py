@@ -25,15 +25,15 @@ class CategoryTab(gridlib.Grid):
         self.moveTo = None
 
         # Get list of all field info
-        flds = self.db.GetCategoryAllFieldInfo()
-        n = len(flds)
+        part = self.db.GetCategoryTemplate()
+        n    = self.db.GetNumCategoryFields()
 
         # Create Grid
         self.CreateGrid(0, n)  # Row, col
 
         # Add the column headers
-        for f in flds:
-            self.SetColLabelValue(f.Id, f.HumanName)
+        for iFld in range(n):
+            self.SetColLabelValue(iFld, part.humanNames[iFld])
         #
 
         # Column widths
@@ -53,51 +53,6 @@ class CategoryTab(gridlib.Grid):
                 self.SetReadOnly(iRow, iCol, True)
             iRow = iRow + 1
         #
-
-        #self.SetCellFont(0, 0, wx.Font(12, wx.ROMAN, wx.ITALIC, wx.NORMAL))
-
-        #self.SetCellTextColour(1, 1, wx.RED)
-
-        #self.SetCellBackgroundColour(2, 2, wx.CYAN)
-
-        #self.SetReadOnly(3, 3, True)
-
-        #self.SetCellEditor(5, 0, gridlib.GridCellNumberEditor(1,1000))
-        #self.SetCellValue(5, 0, "123")
-
-        #self.SetCellEditor(6, 0, gridlib.GridCellFloatEditor())
-        #self.SetCellValue(6, 0, "123.34")
-
-        #self.SetCellEditor(7, 0, gridlib.GridCellNumberEditor())
-
-        #self.SetCellValue(6, 3, "You can veto editing this cell")
-
-        # attribute objects let you keep a set of formatting values
-        # in one spot, and reuse them if needed
-        #attr = gridlib.GridCellAttr()
-        #attr.SetTextColour(wx.BLACK)
-        #attr.SetBackgroundColour(wx.RED)
-        #attr.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
-
-        # you can set cell attributes for the whole row (or column)
-        #self.SetRowAttr(5, attr)
-
-        # overflow cells
-        #self.SetCellValue( 9, 1, "This default cell will overflow into neighboring cells, but not if you turn overflow off.");
-
-        #self.SetCellSize(11, 1, 3, 3);
-        #self.SetCellAlignment(11, 1, wx.ALIGN_CENTRE, wx.ALIGN_CENTRE);
-        #self.SetCellValue(11, 1, "This cell is set to span 3 rows and 3 columns");
-
-
-        #editor = gridlib.GridCellTextEditor()
-        #editor.SetParameters('10')
-        #self.SetCellEditor(0, 4, editor)
-        #self.SetCellValue(0, 4, "Limited text")
-
-        #renderer = gridlib.GridCellAutoWrapStringRenderer()
-        #self.SetCellRenderer(15,0, renderer)
-        #self.SetCellValue(15,0, "The text in this cell will be rendered with word-wrapping")
 
         
         # Register events
@@ -129,19 +84,26 @@ class CategoryTab(gridlib.Grid):
     ###################################################################
     # Add a new record to the end 
     ###################################################################
-    def AppendRecord(self, row):
+    def AppendRecord(self, lst):
         self.AppendRows(1)
-        i = self.GetNumberRows() - 1
-        j = 0
-        n = len(row)
-        for j in range(n):
-            if (type(row[j]) is types.IntType):
-                self.SetCellValue(i, j,  str(row[j]))
+        row = self.GetNumberRows() - 1
+        self.UpdateRecord(row, lst)
+    #
+
+
+    ###################################################################
+    # Update a record
+    ###################################################################
+    def UpdateRecord(self, row, lst):
+        for col in range(len(lst)):
+            if (type(lst[col]) is types.IntType):
+                self.SetCellValue(row, col,  str(lst[col]))
             else:
-                self.SetCellValue(i, j,  row[j])
+                self.SetCellValue(row, col,  lst[col])
             #
         #
     #
+
 
 
     ###################################################################
@@ -174,6 +136,53 @@ class CategoryTab(gridlib.Grid):
 
         categoryNo = self.GetCellValue(selectedRow, 0)
 
+        self.EditCategory(categoryNo, selectedCol)
+
+        evt.Skip()
+    #
+
+
+    ###################################################################
+    # Delete category
+    ###################################################################
+    def DeleteCategory(self, categoryId):
+
+        self.db.DelCategory(categoryId)
+
+        # Make grid one row smaller
+        self.DeleteRows(0, 1)
+
+        # Redraw the grid
+        self.RedrawGrid()
+    #
+
+
+    ###################################################################
+    # Add part
+    ###################################################################
+    def AddCategory(self):
+
+        # Create a blank part
+        category = Category.Category()
+
+        # Add part to database
+        self.db.AddCategory(category)
+
+        # Add entry in table
+        self.AppendRows(1)
+
+        # Redraw the grid
+        row = self.RedrawGrid()
+
+        return row-1
+    #
+
+    ###################################################################
+    # Edit part (and focus on given column)
+    ###################################################################
+    def EditCategory(self, categoryNo, selectedCol):
+
+
         # Open the edit dialog
         dlg = CategoryDlg.CategoryDlg(self, -1, "Edit", categoryNo, selectedCol, self.db)
         dlg.CenterOnScreen()
@@ -190,15 +199,8 @@ class CategoryTab(gridlib.Grid):
             # Update the database
             self.db.UpdateCategory(categoryNo, newLst)
 
-            # Redraw the line in the grid
-            n = len(newLst)
-            for j in range(n):
-                if (type(newLst[j]) is types.IntType):
-                    self.SetCellValue(selectedRow, j,  str(newLst[j]))
-                else:
-                    self.SetCellValue(selectedRow, j,  newLst[j])
-                #
-            #
+            # Redraw the grid
+            self.RedrawGrid()
 
         elif (val == wx.ID_CANCEL):
             print "Discarding changes"
@@ -209,8 +211,7 @@ class CategoryTab(gridlib.Grid):
         # Now kill the dialog processing
         dlg.Destroy()
 
-        evt.Skip()
-    #
+    #    
 
     ###################################################################
     # Right double click
@@ -234,9 +235,58 @@ class CategoryTab(gridlib.Grid):
     # Right clock on label
     ###################################################################
     def OnLabelRightClick(self, evt):
-        sys.stdout.write("OnLabelRightClick: (%d,%d) %s\n" %
-                       (evt.GetRow(), evt.GetCol(), evt.GetPosition()))
-        evt.Skip()
+
+        row = evt.GetRow()
+        col = evt.GetCol()
+
+        # Right click on vertical header
+        if (col == -1):
+
+            # Pop up a Row context menu
+            menu = RowContextMenu(row)
+            self.PopupMenu(menu, evt.GetPosition())
+            retval = menu.GetRetval()
+            menu.Destroy()
+
+            # Uninitialized
+            if (retval == 0):
+                print "zip"
+
+            # Edit
+            elif (retval == 1):
+                categoryNo = self.GetCellValue(row, 0)
+                self.EditCategory(categoryNo, col)
+
+            # Delete
+            elif (retval == 2):
+                categoryNo = self.GetCellValue(row, 0)
+                self.DeleteCategory(categoryNo)
+
+            # Add
+            elif (retval == 3):
+
+                # Add the part
+                row = self.AddCategory()
+
+                # Now force it do be edited
+                categoryNo = self.GetCellValue(row, 0)
+
+                self.EditCategory(partNo, 2)
+
+            # Bad answer
+            else:
+                print "???"
+            #
+
+        # Right click on horizontal header
+        elif (row == -1):
+            pass
+
+        else:
+            pass
+        #
+       
+        evt.Skip()        
     #
 
     ###################################################################
@@ -367,5 +417,66 @@ class CategoryTab(gridlib.Grid):
         sys.stdout.write("OnEditorCreated: (%d, %d) %s\n" %
                        (row, col, evt.GetControl()))
     #    
+#
+
+
+#######################################################################
+#
+#######################################################################
+class RowContextMenu(wx.Menu):
+
+    ###################################################################
+    #
+    ###################################################################
+    def __init__(self, row):
+        wx.Menu.__init__(self)
+
+        self.row = row
+    
+        item = wx.MenuItem(self, wx.NewId(), "Edit")
+        self.AppendItem(item)
+        self.Bind(wx.EVT_MENU, self.OnEditRow, item)
+
+        item = wx.MenuItem(self, wx.NewId(),"Delete")
+        self.AppendItem(item)
+        self.Bind(wx.EVT_MENU, self.OnDeleteRow, item)
+
+        item = wx.MenuItem(self, wx.NewId(),"Add")
+        self.AppendItem(item)
+        self.Bind(wx.EVT_MENU, self.OnAddRow, item)
+
+        self.retval = 0
+    #
+
+
+    ###################################################################
+    #
+    ###################################################################
+    def OnEditRow(self, event):
+        self.retval = 1
+    #
+
+
+    ###################################################################
+    #
+    ###################################################################
+    def OnDeleteRow(self, event):
+        self.retval = 2
+    #
+
+
+    ###################################################################
+    #
+    ###################################################################
+    def OnAddRow(self, event):
+        self.retval = 3
+    #
+
+    ###################################################################
+    #
+    ###################################################################
+    def GetRetval(self):
+        return self.retval
+    #
 #
 

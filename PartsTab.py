@@ -90,25 +90,6 @@ class PartsTab(gridlib.Grid):
         self.UpdateRecord(row, lst)
     #
 
-    ###################################################################
-    # Redraw grid
-    ###################################################################
-    def RedrawGrid(self):
-
-        # For each item in the database
-        rows = self.db.GetAllParts()
-        iRow = 0
-        for lst in rows:
-            self.UpdateRecord(iRow, lst)
-            for iCol in range(len(lst)):
-                self.SetReadOnly(iRow, iCol, True)
-            #
-            iRow = iRow + 1
-        #
-
-        return iRow
-
-    #
 
     ###################################################################
     # Update a record

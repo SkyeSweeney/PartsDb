@@ -16,8 +16,8 @@ class Part():
     def __init__(self):
 
 
-        self.ids        = [0,1,2,3,4,5,6,7,8,9,10,11,12,13]
 
+        # SQL names for fields
         self.sqlNames   = ["PartId",
                            "Name",
                            "Description",
@@ -33,6 +33,7 @@ class Part():
                            "Datasheet",
                            "Notes"]
 
+        # Human names for fields
         self.humanNames = ["PartId",
                            "Name",
                            "Description",
@@ -48,6 +49,7 @@ class Part():
                            "Datasheet",
                            "Notes"]
 
+        # SQL types for each field
         self.sqlTypes   = ["INTEGER PRIMARY KEY",
                            "TEXT",
                            "TEXT",
@@ -63,6 +65,7 @@ class Part():
                            "TEXT",
                            "TEXT"]
 
+        # Is the field editable
         self.editables   = [False,
                             True,
                             True,
@@ -78,6 +81,7 @@ class Part():
                             True,
                             True]
 
+        # Default values for a new part
         self.defaults    = [0,
                             "*",
                             "*",
@@ -93,23 +97,10 @@ class Part():
                             "*",
                             "*"]
 
-        self.values      = [0,
-                            "",
-                            "",
-                            0,
-                            0,
-                            "",
-                            "",
-                            "",
-                            "",
-                            "",
-                            "",
-                            "",
-                            "",
-                            ""]
+        self.values      = []
 
         # Determine number of fields
-        self.numFields = 14
+        self.numFields = len(self.sqlNames)
 
         # Set default values
         self.setDefaults()
@@ -121,10 +112,8 @@ class Part():
     ###################################################################
     def setDefaults(self):
 
-        # For each field
-        for i in range(self.numFields):
-            self.values[i] = self.defaults[i]
-        #
+        # Do a deep copy
+        self.values = self.defaults[:]
 
     #
 
@@ -166,7 +155,7 @@ class Part():
     ###################################################################
     def makeRecord(self):
 
-        retval=""
+        retval = ""
 
         # For each field
         for iFld in range(self.numFields):
@@ -232,7 +221,7 @@ class Part():
         try:
             v = self.values[n]
         except:
-            print "Invalid index"
+            print "Invalid index in GetValueByIndex"
             raise IndexError()
         #
         return v
