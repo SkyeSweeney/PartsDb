@@ -70,12 +70,13 @@ class Database():
         cmd = "CREATE TABLE PartsTbl("
 
         for i in range(self.numPartFields):
-            fld = self.templatePart.getFieldInfo(i)
-            n = fld.SqlName # field name
-            t = fld.SqlType # field type
+            p = self.templatePart
+            n = p.sqlNames[i] # field name
+            t = p.sqlTypes[i] # field type
             cmd = cmd + "%s %s," % (n, t)
         #
         cmd = cmd[:-1] + ")"
+        print cmd
 
         self.c.execute(cmd)
         self.conn.commit()
@@ -209,6 +210,7 @@ class Database():
             print "DB is not open"
             return
         #
+
         cmd = "SELECT * FROM PartsTbl;"
         try:
             rows = []
@@ -305,12 +307,12 @@ class Database():
 
         # Create command
         setStr = "SET "
-        flds = self.GetPartAllFieldInfo()
-        for iFld in range(len(flds)):
+        part = self.GetPartTemplate()
+        for iFld in range(self.numPartFields):
             if (type(lst[iFld]) is types.IntType):
-                setStr = setStr + "%s=%d," %(flds[iFld].SqlName,lst[iFld])
+                setStr = setStr + "%s=%d," %(part.sqlNames[iFld],lst[iFld])
             else:                
-                setStr = setStr + '%s="%s",' %(flds[iFld].SqlName,lst[iFld])
+                setStr = setStr + '%s="%s",' %(part.sqlNames[iFld],lst[iFld])
             #
         #
         setStr = setStr[:-1]
@@ -338,16 +340,10 @@ class Database():
     ###################################################################
     # Get all a list of field info for all parts
     ###################################################################
-    def GetPartAllFieldInfo(self):  
-        return self.templatePart.getAllFieldInfo()
+    def GetPartTemplate(self):  
+        return self.templatePart
     #
 
-    ###################################################################
-    # Get field info for a given field
-    ###################################################################
-    def GetPartFieldInfo(self, i):  
-        return self.templatePart.getFieldInfo(i)
-    #
 
 
 
@@ -909,8 +905,8 @@ if __name__ == "__main__":
     part.setFromList((0,
                      "2N2222A",
                      "NPN transistor",
-                     "33",
-                     "5",
+                     33,
+                     5,
                      "Blue bin",
                      "Fairchild",
                      "2N2222A",
@@ -933,8 +929,8 @@ if __name__ == "__main__":
     part.setFromList((0,
                      "Arduino Uno",
                      "Arduino Uno",
-                     "4",
-                     "1",
+                     4,
+                     1,
                      "Blue bin",
                      "Arduino Company",
                      "Arduino Uno",

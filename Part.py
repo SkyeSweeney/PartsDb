@@ -15,33 +15,101 @@ class Part():
     ###################################################################
     def __init__(self):
 
-        # Create a named tuple type
-        PartFieldInfo = collections.namedtuple("PartFieldInfo", ["Id", "SqlName", "HumanName", "SqlType", "Editable", "DefaultVal"])
 
-        # Create a list of information about each field
-        self.fields = []
+        self.ids        = [0,1,2,3,4,5,6,7,8,9,10,11,12,13]
 
-        #                                 Id, SqlName          HumanName,        SqlType                Editable   DefaultVal
-        self.fields.append( PartFieldInfo(0,  "PartId",        "Part #",         "INTEGER PRIMARY KEY", False,    0) )
-        self.fields.append( PartFieldInfo(1,  "Name",          "Name",           "TEXT",                True,     "*") )
-        self.fields.append( PartFieldInfo(2,  "Description",   "Description",    "TEXT",                True,     "*") )
-        self.fields.append( PartFieldInfo(3,  "Quantity",      "Quantity",       "TEXT",                True,     "*") )
-        self.fields.append( PartFieldInfo(4,  "Min",           "Min",            "TEXT",                True,     "*") )
-        self.fields.append( PartFieldInfo(5,  "Location",      "Location",       "TEXT",                True,     "*") )
-        self.fields.append( PartFieldInfo(6,  "Mfg",           "Mfg",            "TEXT",                True,     "*") )
-        self.fields.append( PartFieldInfo(7,  "MfgPartNo",     "Mfg Part #",     "TEXT",                True,     "*") )
-        self.fields.append( PartFieldInfo(8,  "MfgWebsite",    "Mfg Website",    "TEXT",                True,     "*") )
-        self.fields.append( PartFieldInfo(9,  "Vendor",        "Vendor",         "TEXT",                True,     "*") )
-        self.fields.append( PartFieldInfo(10, "VendorPartNo",  "Vendor Part #",  "TEXT",                True,     "*") )
-        self.fields.append( PartFieldInfo(11, "VendorWebsite", "Vendor Website", "TEXT",                True,     "*") )
-        self.fields.append( PartFieldInfo(12, "Datasheet",     "Datasheet",      "TEXT",                True,     "*") )
-        self.fields.append( PartFieldInfo(13, "Notes",         "Notes",          "TEXT",                True,     "*") )
+        self.sqlNames   = ["PartId",
+                           "Name",
+                           "Description",
+                           "Quantity",
+                           "Min",
+                           "Location",
+                           "Mfg",
+                           "MfgPartNo",
+                           "MfgWebsite",
+                           "Vendor",
+                           "VendorPartNo",
+                           "VendorWebsite",
+                           "Datasheet",
+                           "Notes"]
+
+        self.humanNames = ["Part #",
+                           "Name",
+                           "Description",
+                           "Quantity",
+                           "Min",
+                           "Location",
+                           "Mfg",
+                           "Mfg Part #",
+                           "Mfg Website",
+                           "Vendor",
+                           "Vendor Part #",
+                           "Vendor Website",
+                           "Datasheet",
+                           "Notes"]
+
+        self.sqlTypes   = ["INTEGER PRIMARY KEY",
+                           "TEXT",
+                           "TEXT",
+                           "INTEGER",
+                           "INTEGER",
+                           "TEXT",
+                           "TEXT",
+                           "TEXT",
+                           "TEXT",
+                           "TEXT",
+                           "TEXT",
+                           "TEXT",
+                           "TEXT",
+                           "TEXT"]
+
+        self.editables   = [False,
+                            True,
+                            True,
+                            True,
+                            True,
+                            True,
+                            True,
+                            True,
+                            True,
+                            True,
+                            True,
+                            True,
+                            True,
+                            True]
+
+        self.defaults    = [0,
+                            "*",
+                            "*",
+                            0,
+                            0,
+                            "*",
+                            "*",
+                            "*",
+                            "*",
+                            "*",
+                            "*",
+                            "*",
+                            "*",
+                            "*"]
+
+        self.values      = [0,
+                            "",
+                            "",
+                            0,
+                            0,
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            ""]
 
         # Determine number of fields
-        self.numFields = len(self.fields)
-
-        # Create list of values for each field
-        self.values = ["" for x in range(self.numFields)]
+        self.numFields = 14
 
         # Set default values
         self.setDefaults()
@@ -54,8 +122,8 @@ class Part():
     def setDefaults(self):
 
         # For each field
-        for fld in self.fields:
-            self.values[fld.Id] = fld.DefaultVal
+        for i in range(self.numFields):
+            self.values[i] = self.defaults[i]
         #
 
     #
@@ -68,8 +136,7 @@ class Part():
 
         # For each field
         for iFld in range(self.numFields):
-            fld = self.fields[iFld]
-            self.values[fld.Id] = lst[iFld]
+            self.values[iFld] = lst[iFld]
         #
 
     #
@@ -83,10 +150,9 @@ class Part():
 
         # For each field
         for iFld in range(self.numFields):
-            fld = self.fields[iFld]
-            if ("TEXT" in fld.SqlType):
+            if ("TEXT" in self.sqlTypes[iFld]):
                 retval = retval + '"%s"' % self.values[iFld] + ","
-            elif ("INTEGER" in fld.SqlType):
+            elif ("INTEGER" in self.sqlTypes[iFld]):
                 retval = retval + '%d' % self.values[iFld] + ","
             else:
                 pass
@@ -104,12 +170,11 @@ class Part():
 
         # For each field
         for iFld in range(self.numFields):
-            fld = self.fields[iFld]
-            if ("KEY" in fld.SqlType):
+            if ("KEY" in self.sqlTypes[iFld]):
                 retval = retval + 'null' + ","
-            if ("TEXT" in fld.SqlType):
+            if ("TEXT" in self.sqlTypes[iFld]):
                 retval = retval + '"%s"' % self.values[iFld] + ","
-            elif ("INTEGER" in fld.SqlType):
+            elif ("INTEGER" in self.sqlTypes[iFld]):
                 retval = retval + '%d' % self.values[iFld] + ","
             else:
                 pass
@@ -128,11 +193,10 @@ class Part():
 
         # For each field
         for iFld in range(self.numFields):
-            fld = self.fields[iFld]
-            if ("PRIMARY" not in fld.SqlType):
-                if ("TEXT" in fld.SqlType):
+            if ("PRIMARY" not in self.sqlTypes[iFld]):
+                if ("TEXT" in self.sqlTypes[iFld]):
                     retval = retval + '"%s"' % self.values[iFld] + ","
-                elif ("INTEGER" in fld.SqlType):
+                elif ("INTEGER" in self.sqlTypes[iFld]):
                     retval = retval + '%d' % self.values[iFld] + ","
                 else:
                     pass
@@ -152,39 +216,21 @@ class Part():
 
         # For each field
         for iFld in range(self.numFields):
-            fld = self.fields[iFld]
-            if ("PRIMARY" not in fld.SqlType):
-                retval = retval + '%s' % fld.SqlName + ","
+            if ("PRIMARY" not in self.sqlTypes[iFld]):
+                retval = retval + '%s' % self.sqlNames[iFld] + ","
             #
         #
         retval = retval[:-1]
         return retval
     #
 
-    ###################################################################
-    # Get list of field info of nth field
-    ###################################################################
-    def getFieldInfo(self, n):
-        try:
-            return self.fields[n]
-        except:
-            raise IndexError()
-        #
-    #
-
-    ###################################################################
-    # Get list of all fields
-    ###################################################################
-    def getAllFieldInfo(self):
-        return self.fields
-    #
 
     ###################################################################
     # Get value by index
     ###################################################################
     def getValueByIndex(self,n):
         try:
-            v = self.values[self.fields[n].Id]
+            v = self.values[n]
         except:
             print "Invalid index"
             raise IndexError()
@@ -197,7 +243,7 @@ class Part():
     ###################################################################
     def setValueByIndex(self, n, val):
         try:
-            self.values[self.fields[n].Id] = val
+            self.values[n] = val
         except:
             print "Invalid index in setValueByIndex"
             raise IndexError()
@@ -211,18 +257,6 @@ class Part():
         return self.numFields
     #
 
-
-    ###################################################################
-    # Does the field name exist
-    ###################################################################
-    def exists(self, fld):
-        for field in self.fields:
-            if (fld == field.SqlName) or (fld == field.HumanName):
-                return True
-            #
-        #
-        return False
-    #
 #
 
     
@@ -247,7 +281,21 @@ if __name__ == "__main__":
     print p.makeRecord()
 
     # Populate the part from a list
-    l = [0, "Barcode", "Website", "Mfg", "MfgPartNo", "MfgBarcode", "MfgWebsite", "Vendor", "VendorPartNo", "VendorBarcode", "VendorWebsite", "Quantity", "Title", "Description", "Catagory", "Package", "Location", "Notes"]
+    l   = [0,
+           "Name",
+           "Description",
+           10,
+           5,
+           "Location",
+           "Mfg",
+           "MfgPartNo",
+           "MfgWebsite",
+           "Vendor",
+           "VendorPartNo",
+           "VendorWebsite",
+           "Datasheet",
+           "Notes"]
+
     print l
     p.setFromList(l)
     print "SetFromList", p
@@ -257,13 +305,6 @@ if __name__ == "__main__":
     print p.getValueByIndex(3)
     try:
         print p.getValueByIndex(99)
-    except:
-        print "Bad index"
-
-    print p.getFieldInfo(3)
-    print p.getAllFieldInfo()
-    try:
-        print p.getFieldInfo(99)
     except:
         print "Bad index"
     #

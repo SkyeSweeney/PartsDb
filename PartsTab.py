@@ -23,21 +23,19 @@ class PartsTab(gridlib.Grid):
 
         self.db = db
 
-        self.moveTo = None
-
         # Get list of all field info
-        flds = self.db.GetPartAllFieldInfo()
-        n = len(flds)
+        part = self.db.GetPartTemplate()
+        n    = self.db.GetNumPartFields()
 
         # Create Grid
         self.CreateGrid(0, n)  # Row, col
 
         # Add the column headers
-        for f in flds:
-            self.SetColLabelValue(f.Id, f.HumanName)
+        for iFld in range(n):
+            self.SetColLabelValue(iFld, part.humanNames[iFld])
         #
 
-        # Column widths
+        # Set column widths
         for i in range(n):
           self.AutoSizeColumn(i)
         #
@@ -54,51 +52,6 @@ class PartsTab(gridlib.Grid):
                 self.SetReadOnly(iRow, iCol, True)
             iRow = iRow + 1
         #
-
-        #self.SetCellFont(0, 0, wx.Font(12, wx.ROMAN, wx.ITALIC, wx.NORMAL))
-
-        #self.SetCellTextColour(1, 1, wx.RED)
-
-        #self.SetCellBackgroundColour(2, 2, wx.CYAN)
-
-        #self.SetReadOnly(3, 3, True)
-
-        #self.SetCellEditor(5, 0, gridlib.GridCellNumberEditor(1,1000))
-        #self.SetCellValue(5, 0, "123")
-
-        #self.SetCellEditor(6, 0, gridlib.GridCellFloatEditor())
-        #self.SetCellValue(6, 0, "123.34")
-
-        #self.SetCellEditor(7, 0, gridlib.GridCellNumberEditor())
-
-        #self.SetCellValue(6, 3, "You can veto editing this cell")
-
-        # attribute objects let you keep a set of formatting values
-        # in one spot, and reuse them if needed
-        #attr = gridlib.GridCellAttr()
-        #attr.SetTextColour(wx.BLACK)
-        #attr.SetBackgroundColour(wx.RED)
-        #attr.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
-
-        # you can set cell attributes for the whole row (or column)
-        #self.SetRowAttr(5, attr)
-
-        # overflow cells
-        #self.SetCellValue( 9, 1, "This default cell will overflow into neighboring cells, but not if you turn overflow off.");
-
-        #self.SetCellSize(11, 1, 3, 3);
-        #self.SetCellAlignment(11, 1, wx.ALIGN_CENTRE, wx.ALIGN_CENTRE);
-        #self.SetCellValue(11, 1, "This cell is set to span 3 rows and 3 columns");
-
-
-        #editor = gridlib.GridCellTextEditor()
-        #editor.SetParameters('10')
-        #self.SetCellEditor(0, 4, editor)
-        #self.SetCellValue(0, 4, "Limited text")
-
-        #renderer = gridlib.GridCellAutoWrapStringRenderer()
-        #self.SetCellRenderer(15,0, renderer)
-        #self.SetCellValue(15,0, "The text in this cell will be rendered with word-wrapping")
 
         
         # Register events
@@ -134,6 +87,7 @@ class PartsTab(gridlib.Grid):
     def AppendRecord(self, lst):
         self.AppendRows(1)
         row = self.GetNumberRows() - 1
+        print "appending"
         self.UpdateRecord(row, lst)
     #
 
@@ -161,10 +115,12 @@ class PartsTab(gridlib.Grid):
     # Update a record
     ###################################################################
     def UpdateRecord(self, row, lst):
+        print "update", row, lst
         for col in range(len(lst)):
             if (type(lst[col]) is types.IntType):
                 self.SetCellValue(row, col,  str(lst[col]))
             else:
+                print lst[col]
                 self.SetCellValue(row, col,  lst[col])
             #
         #
