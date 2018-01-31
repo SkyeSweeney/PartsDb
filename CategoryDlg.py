@@ -18,7 +18,7 @@ class CategoryDlg(wx.Dialog):
                  parent, 
                  ID, 
                  title, 
-                 categoryNo,
+                 categoryId,
                  selectedCol,
                  db,
                  size=wx.DefaultSize, 
@@ -27,7 +27,7 @@ class CategoryDlg(wx.Dialog):
                  ):
 
         self.db = db
-        self.categoryNo = categoryNo
+        self.categoryId = categoryId
 
         wx.Dialog.__init__(self, 
                            None, 
@@ -36,13 +36,15 @@ class CategoryDlg(wx.Dialog):
                            style=wx.DEFAULT_DIALOG_STYLE|wx.THICK_FRAME|wx.RESIZE_BORDER|wx.TAB_TRAVERSAL)
 
         # Get the category data for this row
-        rows = self.db.GetCategoryBy("CategoryNo", self.categoryNo)
+        rows = self.db.GetCategoryByFieldValue("CategoryId", self.categoryId)
 
         if (len(rows) != 1):
             print "Invalid results"
             sys.exit(1)
         #
         row = rows[0]
+
+        print "row", row,self.db.GetNumCategoryFields()
 
         # Create a category from the row
         category = Category.Category()
@@ -52,20 +54,20 @@ class CategoryDlg(wx.Dialog):
         vSizer = wx.BoxSizer(wx.VERTICAL)
 
         # Get list of all fields
-        flds = self.db.GetCategoryAllFieldInfo()
+        template = self.db.GetCategoryTemplate()
 
         self.values = []
 
         # For each field in the category
-        for iFld in range(len(flds)):
+        for iFld in range(self.db.GetNumCategoryFields()):
 
             # Create a sizer for row
             hSizer = wx.BoxSizer(wx.HORIZONTAL)
 
             # Create label for field name
-            label = wx.StaticText(self, -1, flds[iFld].HumanName)
+            label = wx.StaticText(self, -1, template.humanNames[iFld])
 
-            if (flds[iFld].Editable):
+            if (template.editables[iFld]):
                 st = 0
             else:
                 st = wx.TE_READONLY
@@ -124,15 +126,15 @@ class CategoryDlg(wx.Dialog):
         retval = []
 
         # Get list of all fields
-        flds = self.db.GetCategoryAllFieldInfo()
+        template = self.db.GetCategoryTemplate()
 
         # For each field in the category
-        for iFld in range(len(flds)):
+        for iFld in range(self.db.GetNumCategoryFields()):
 
             val = self.values[iFld].GetValue()
 
             # Create item to hold value
-            if (type(flds[iFld].SqlType) is types.IntType):
+            if (type(template.sqlTypes[iFld]) is types.IntType):
                 retval.append(int(val))
             else:
                 retval.append(val)

@@ -17,7 +17,7 @@ class Category():
 
         self.humanNames = ["CategoryId", "Name", "Description", "Notes"]
 
-        self.sqlNames = ["Category #", "Name", "Description", "Notes"]
+        self.sqlNames = ["CategoryId", "Name", "Description", "Notes"]
 
         self.sqlTypes = ["INTEGER PRIMARY KEY", "TEXT", "TEXT", "TEXT"]
 
@@ -50,8 +50,7 @@ class Category():
 
         # For each field
         for iFld in range(self.numFields):
-            fld = self.fields[iFld]
-            self.values[ifld] = lst[iFld]
+            self.values[iFld] = lst[iFld]
         #
 
     #

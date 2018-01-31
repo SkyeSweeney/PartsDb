@@ -6,6 +6,7 @@ import sys
 import types
 
 import ProjectDlg
+import Project
 
 
 #######################################################################
@@ -25,15 +26,15 @@ class ProjectTab(gridlib.Grid):
         self.moveTo = None
 
         # Get list of all field info
-        flds = self.db.GetProjectAllFieldInfo()
-        n = len(flds)
+        template = self.db.GetProjectTemplate()
+        n        = self.db.GetNumProjectFields()
 
         # Create Grid
         self.CreateGrid(0, n)  # Row, col
 
         # Add the column headers
-        for f in flds:
-            self.SetColLabelValue(f.Id, f.HumanName)
+        for iFld in range(n):
+            self.SetColLabelValue(iFld, template.humanNames[iFld])
         #
 
         # Column widths
@@ -53,51 +54,6 @@ class ProjectTab(gridlib.Grid):
                 self.SetReadOnly(iRow, iCol, True)
             iRow = iRow + 1
         #
-
-        #self.SetCellFont(0, 0, wx.Font(12, wx.ROMAN, wx.ITALIC, wx.NORMAL))
-
-        #self.SetCellTextColour(1, 1, wx.RED)
-
-        #self.SetCellBackgroundColour(2, 2, wx.CYAN)
-
-        #self.SetReadOnly(3, 3, True)
-
-        #self.SetCellEditor(5, 0, gridlib.GridCellNumberEditor(1,1000))
-        #self.SetCellValue(5, 0, "123")
-
-        #self.SetCellEditor(6, 0, gridlib.GridCellFloatEditor())
-        #self.SetCellValue(6, 0, "123.34")
-
-        #self.SetCellEditor(7, 0, gridlib.GridCellNumberEditor())
-
-        #self.SetCellValue(6, 3, "You can veto editing this cell")
-
-        # attribute objects let you keep a set of formatting values
-        # in one spot, and reuse them if needed
-        #attr = gridlib.GridCellAttr()
-        #attr.SetTextColour(wx.BLACK)
-        #attr.SetBackgroundColour(wx.RED)
-        #attr.SetFont(wx.Font(10, wx.SWISS, wx.NORMAL, wx.BOLD))
-
-        # you can set cell attributes for the whole row (or column)
-        #self.SetRowAttr(5, attr)
-
-        # overflow cells
-        #self.SetCellValue( 9, 1, "This default cell will overflow into neighboring cells, but not if you turn overflow off.");
-
-        #self.SetCellSize(11, 1, 3, 3);
-        #self.SetCellAlignment(11, 1, wx.ALIGN_CENTRE, wx.ALIGN_CENTRE);
-        #self.SetCellValue(11, 1, "This cell is set to span 3 rows and 3 columns");
-
-
-        #editor = gridlib.GridCellTextEditor()
-        #editor.SetParameters('10')
-        #self.SetCellEditor(0, 4, editor)
-        #self.SetCellValue(0, 4, "Limited text")
-
-        #renderer = gridlib.GridCellAutoWrapStringRenderer()
-        #self.SetCellRenderer(15,0, renderer)
-        #self.SetCellValue(15,0, "The text in this cell will be rendered with word-wrapping")
 
         
         # Register events
@@ -129,19 +85,47 @@ class ProjectTab(gridlib.Grid):
     ###################################################################
     # Add a new record to the end 
     ###################################################################
-    def AppendRecord(self, row):
+    def AppendRecord(self, lst):
         self.AppendRows(1)
-        i = self.GetNumberRows() - 1
-        j = 0
-        n = len(row)
-        for j in range(n):
-            if (type(row[j]) is types.IntType):
-                self.SetCellValue(i, j,  str(row[j]))
+        row = self.GetNumberRows() - 1
+        self.UpdateRecord(row, lst)
+    #
+
+
+    ###################################################################
+    # Update a record
+    ###################################################################
+    def UpdateRecord(self, row, lst):
+        for col in range(len(lst)):
+            if (type(lst[col]) is types.IntType):
+                self.SetCellValue(row, col,  str(lst[col]))
             else:
-                self.SetCellValue(i, j,  row[j])
+                self.SetCellValue(row, col,  lst[col])
             #
         #
     #
+
+
+    ###################################################################
+    # Redraw grid
+    ###################################################################
+    def RedrawGrid(self):
+
+        # For each item in the database
+        rows = self.db.GetAllProjects()
+        iRow = 0
+        for lst in rows:
+            self.UpdateRecord(iRow, lst)
+            for iCol in range(len(lst)):
+                self.SetReadOnly(iRow, iCol, True)
+            #
+            iRow = iRow + 1
+        #
+
+        return iRow
+
+    #
+
 
 
     ###################################################################
@@ -172,10 +156,57 @@ class ProjectTab(gridlib.Grid):
         selectedRow = evt.GetRow()
         selectedCol = evt.GetCol()
 
-        projectNo = self.GetCellValue(selectedRow, 0)
+        projectId = self.GetCellValue(selectedRow, 0)
+
+        self.EditProject(projectId, selectedCol)
+
+        evt.Skip()
+    #
+
+
+    ###################################################################
+    # Delete project
+    ###################################################################
+    def DeleteProject(self, projectId):
+
+        self.db.DelProject(projectId)
+
+        # Make grid one row smaller
+        self.DeleteRows(0, 1)
+
+        # Redraw the grid
+        self.RedrawGrid()
+    #
+
+
+    ###################################################################
+    # Add Project
+    ###################################################################
+    def AddProject(self):
+
+        # Create a blank project
+        project = Project.Project()
+
+        # Add project to database
+        self.db.AddProject(project)
+
+        # Add entry in table
+        self.AppendRows(1)
+
+        # Redraw the grid
+        row = self.RedrawGrid()
+
+        return row-1
+    #
+
+    ###################################################################
+    # Edit Project (and focus on given column)
+    ###################################################################
+    def EditProject(self, projectId, selectedCol):
+
 
         # Open the edit dialog
-        dlg = ProjectDlg.ProjectDlg(self, -1, "Edit", projectNo, selectedCol, self.db)
+        dlg = ProjectDlg.ProjectDlg(self, -1, "Edit", projectId, selectedCol, self.db)
         dlg.CenterOnScreen()
 
         # Display dialog and wait for OK or Cancel
@@ -188,17 +219,10 @@ class ProjectTab(gridlib.Grid):
             newLst = dlg.GetProjectData()
 
             # Update the database
-            self.db.UpdateProject(projectNo, newLst)
+            self.db.UpdateProject(projectId, newLst)
 
-            # Redraw the line in the grid
-            n = len(newLst)
-            for j in range(n):
-                if (type(newLst[j]) is types.IntType):
-                    self.SetCellValue(selectedRow, j,  str(newLst[j]))
-                else:
-                    self.SetCellValue(selectedRow, j,  newLst[j])
-                #
-            #
+            # Redraw the grid
+            self.RedrawGrid()
 
         elif (val == wx.ID_CANCEL):
             print "Discarding changes"
@@ -209,8 +233,7 @@ class ProjectTab(gridlib.Grid):
         # Now kill the dialog processing
         dlg.Destroy()
 
-        evt.Skip()
-    #
+    #    
 
     ###################################################################
     # Right double click
@@ -234,9 +257,58 @@ class ProjectTab(gridlib.Grid):
     # Right clock on label
     ###################################################################
     def OnLabelRightClick(self, evt):
-        sys.stdout.write("OnLabelRightClick: (%d,%d) %s\n" %
-                       (evt.GetRow(), evt.GetCol(), evt.GetPosition()))
-        evt.Skip()
+
+        row = evt.GetRow()
+        col = evt.GetCol()
+
+        # Right click on vertical header
+        if (col == -1):
+
+            # Pop up a Row context menu
+            menu = RowContextMenu(row)
+            self.PopupMenu(menu, evt.GetPosition())
+            retval = menu.GetRetval()
+            menu.Destroy()
+
+            # Uninitialized
+            if (retval == 0):
+                print "zip"
+
+            # Edit
+            elif (retval == 1):
+                projectId = self.GetCellValue(row, 0)
+                self.EditProject(projectId, col)
+
+            # Delete
+            elif (retval == 2):
+                projectId = self.GetCellValue(row, 0)
+                self.DeleteProject(projectId)
+
+            # Add
+            elif (retval == 3):
+
+                # Add the project
+                row = self.AddProject()
+
+                # Now force it do be edited
+                projectId = self.GetCellValue(row, 0)
+
+                self.EditProject(projectId, 2)
+
+            # Bad answer
+            else:
+                print "???"
+            #
+
+        # Right click on horizontal header
+        elif (row == -1):
+            pass
+
+        else:
+            pass
+        #
+       
+        evt.Skip()        
     #
 
     ###################################################################
@@ -367,5 +439,66 @@ class ProjectTab(gridlib.Grid):
         sys.stdout.write("OnEditorCreated: (%d, %d) %s\n" %
                        (row, col, evt.GetControl()))
     #    
+#
+
+
+#######################################################################
+#
+#######################################################################
+class RowContextMenu(wx.Menu):
+
+    ###################################################################
+    #
+    ###################################################################
+    def __init__(self, row):
+        wx.Menu.__init__(self)
+
+        self.row = row
+    
+        item = wx.MenuItem(self, wx.NewId(), "Edit")
+        self.AppendItem(item)
+        self.Bind(wx.EVT_MENU, self.OnEditRow, item)
+
+        item = wx.MenuItem(self, wx.NewId(),"Delete")
+        self.AppendItem(item)
+        self.Bind(wx.EVT_MENU, self.OnDeleteRow, item)
+
+        item = wx.MenuItem(self, wx.NewId(),"Add")
+        self.AppendItem(item)
+        self.Bind(wx.EVT_MENU, self.OnAddRow, item)
+
+        self.retval = 0
+    #
+
+
+    ###################################################################
+    #
+    ###################################################################
+    def OnEditRow(self, event):
+        self.retval = 1
+    #
+
+
+    ###################################################################
+    #
+    ###################################################################
+    def OnDeleteRow(self, event):
+        self.retval = 2
+    #
+
+
+    ###################################################################
+    #
+    ###################################################################
+    def OnAddRow(self, event):
+        self.retval = 3
+    #
+
+    ###################################################################
+    #
+    ###################################################################
+    def GetRetval(self):
+        return self.retval
+    #
 #
 

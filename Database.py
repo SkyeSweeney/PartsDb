@@ -6,6 +6,7 @@ import types
 import Part
 import Category
 import Project
+import inspect
 
 import sys
 import os
@@ -49,7 +50,7 @@ class Database():
         self.c = self.conn.cursor()
   
         # Determine if PartsTbl exists
-        self.c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='PartsTbl'")
+        self.c.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='PartTbl'")
         exists = self.c.fetchone()
     
         # If it does not, create it
@@ -67,7 +68,7 @@ class Database():
     def CreateDataBase(self):  
 
         # Create the Parts tabel (2N2222A, ADE7763, ...)
-        cmd = "CREATE TABLE PartsTbl("
+        cmd = "CREATE TABLE PartTbl("
 
         for i in range(self.numPartFields):
             p = self.templatePart
@@ -83,50 +84,55 @@ class Database():
         # Create the Category table (FET, Sensor, ...)
         cmd = "CREATE TABLE CategoryTbl("
 
+        template = self.templateCategory
+
         for i in range(self.numCategoryFields):
-            fld = self.templateCategory.getFieldInfo(i)
-            n = fld.SqlName # field name
-            t = fld.SqlType # field type
+            n = template.sqlNames[i] # field name
+            t = template.sqlTypes[i] # field type
             cmd = cmd + "%s %s," % (n, t)
         #
         cmd = cmd[:-1] + ")"
 
+        print cmd
         self.c.execute(cmd)
         self.conn.commit()
   
         # Create the Project table (SailboatTimer, PowerMonitor, ...)
         cmd = "CREATE TABLE ProjectTbl("
+        template = self.templateProject
 
         for i in range(self.numProjectFields):
-            fld = self.templateProject.getFieldInfo(i)
-            n = fld.SqlName # field name
-            t = fld.SqlType # field type
+            n = template.sqlNames[i] # field name
+            t = template.sqlTypes[i] # field type
             cmd = cmd + "%s %s," % (n, t)
         #
         cmd = cmd[:-1] + ")"
+        print cmd
 
         self.c.execute(cmd)
         self.conn.commit()
 
-        # Create the Parts2Project table (Joins parts and projects)
+        # Create the Part2Project table (Joins parts and projects)
         cmd = "CREATE    TABLE Part2Project("\
               "Id        INTEGER PRIMARY KEY,"\
 	      "PartId    INTEGER,"\
 	      "ProjectId INTEGER,"\
-	      "FOREIGN KEY(partId)    REFERENCES part(PartId),"\
-	      "FOREIGN KEY(projectId) REFERENCES project(ProjectId))"
+	      "FOREIGN KEY(PartId)    REFERENCES PartTbl(PartId),"\
+	      "FOREIGN KEY(ProjectId) REFERENCES ProjectTbl(ProjectId))"
 
+        print cmd
         self.c.execute(cmd)
         self.conn.commit()
 
-        # Create the Part2Category table (Joins parts and categories)
+        # Create the PartCategory table (Joins parts and categories)
         cmd = "CREATE     TABLE Part2Category("\
               "Id         INTEGER PRIMARY KEY,"\
 	      "PartId     INTEGER,"\
 	      "CategoryId INTEGER,"\
-	      "FOREIGN KEY(partId)     REFERENCES PartTbl(PartId),"\
-	      "FOREIGN KEY(categoryId) REFERENCES CategoryTbl(CategoryId))"
+	      "FOREIGN KEY(PartId)     REFERENCES PartTbl(PartId),"\
+	      "FOREIGN KEY(CategoryId) REFERENCES CategoryTbl(CategoryId))"
 
+        print cmd
         self.c.execute(cmd)
         self.conn.commit()
     #
@@ -157,7 +163,7 @@ class Database():
         try:
             self.c.execute(cmd)
         except sqlite3.Error as e:
-            print __name__, e.args[0]
+            print inspect.stack()[0][3], e.args[0]
         #
     #
   
@@ -174,7 +180,7 @@ class Database():
         try:
             self.c.execute(cmd)
         except sqlite3.Error as e:
-            print __name__, e.args[0]
+            print inspect.stack()[0][3], e.args[0]
         #
     #
   
@@ -192,7 +198,7 @@ class Database():
         try:
             self.c.execute(cmd)
         except sqlite3.Error as e:
-            print __name__, e.args[0]
+            print inspect.stack()[0][3], e.args[0]
         #
     #
 
@@ -210,14 +216,14 @@ class Database():
             return
         #
 
-        cmd = "SELECT * FROM PartsTbl;"
+        cmd = "SELECT * FROM PartTbl;"
         try:
             rows = []
             for row in self.c.execute(cmd):
                 rows.append(row)
             #
         except sqlite3.Error as e:
-            print __name__, e.args[0]
+            print inspect.stack()[0][3], e.args[0]
         #
 
         return rows  
@@ -232,14 +238,14 @@ class Database():
             print "DB is not open"
             return
         #
-        cmd = "SELECT * FROM PartsTbl WHERE %s == %s" % (field, str(value))
+        cmd = "SELECT * FROM PartTbl WHERE %s == %s" % (field, str(value))
         try:
             rows = []
             for row in self.c.execute(cmd):
                 rows.append(row)
             #
         except sqlite3.Error as e:
-            print __name__, e.args[0]
+            print inspect.stack()[0][3], e.args[0]
         #
 
         return rows  
@@ -257,7 +263,7 @@ class Database():
             return
         #
 
-        cmd = "INSERT INTO PartsTbl (%s) VALUES (%s)" % (part.makeSelect(), part.makeValue())
+        cmd = "INSERT INTO PartTbl (%s) VALUES (%s)" % (part.makeSelect(), part.makeValue())
         try:
             self.c.execute(cmd)
             if commit:
@@ -266,7 +272,7 @@ class Database():
             retval = self.c.lastrowid
             
         except sqlite3.Error as e:
-            print __name__, e.args[0]
+            print inspect.stack()[0][3], e.args[0]
             retval = 0
         #
 
@@ -283,14 +289,14 @@ class Database():
             print "DB is not open"
             return
         #
-        cmd = "DELETE FROM PartsTbl WHERE PartId=%s" % (myPartNum)
+        cmd = "DELETE FROM PartTbl WHERE PartId=%s" % (myPartNum)
         try:
             self.c.execute(cmd)
             if commit:
                 self.conn.commit()
             #
         except sqlite3.Error as e:
-            print __name__, e.args[0]
+            print inspect.stack()[0][3], e.args[0]
         #
     #
   
@@ -315,7 +321,7 @@ class Database():
             #
         #
         setStr = setStr[:-1]
-        cmd = "UPDATE PartsTbl %s WHERE PartId=%s" % (setStr,myPartNum)
+        cmd = "UPDATE PartTbl %s WHERE PartId=%s" % (setStr,myPartNum)
 
         # Execute the command
         try:
@@ -324,7 +330,7 @@ class Database():
                 self.conn.commit()
             #
         except sqlite3.Error as e:
-            print __name__, e.args[0]
+            print inspect.stack()[0][3], e.args[0]
         #
     #
 
@@ -365,7 +371,7 @@ class Database():
                 rows.append(row)
             #
         except sqlite3.Error as e:
-            print __name__, e.args[0]
+            print inspect.stack()[0][3], e.args[0]
         #
 
         return rows  
@@ -388,7 +394,7 @@ class Database():
                 rows.append(row)
             #
         except sqlite3.Error as e:
-            print __name__, e.args[0]
+            print inspect.stack()[0][3], e.args[0]
         #
 
         return rows  
@@ -414,7 +420,7 @@ class Database():
                 rows.append(row)
             #
         except sqlite3.Error as e:
-            print __name__, e.args[0]
+            print inspect.stack()[0][3], e.args[0]
             retval = 0
         #
 
@@ -451,7 +457,7 @@ class Database():
             retval = self.c.lastrowid
             
         except sqlite3.Error as e:
-            print __name__, e.args[0]
+            print inspect.stack()[0][3], e.args[0]
             retval = 0
         #
 
@@ -461,27 +467,27 @@ class Database():
     ###################################################################
     # Delete a category by id
     ###################################################################
-    def DelCategory(self, myCategoryNo, commit=True):
+    def DelCategory(self, myCategoryId, commit=True):
 
         if (not self.dbOpen):
             print "DB is not open"
             return
         #
-        cmd = "DELETE FROM CategoryTbl WHERE CategoryNo=%s" % (myCategoryNo)
+        cmd = "DELETE FROM CategoryTbl WHERE CategoryId=%s" % (myCategoryId)
         try:
             self.c.execute(cmd)
             if commit:
                 self.conn.commit()
             #
         except sqlite3.Error as e:
-            print __name__, e.args[0]
+            print inspect.stack()[0][3], e.args[0]
         #
     #
   
     ###################################################################
     # Update a category with a full list
     ###################################################################
-    def UpdateCategory(self, myCategoryNo, lst, commit=True):
+    def UpdateCategory(self, myCategoryId, lst, commit=True):
 
         if (not self.dbOpen):
             print "DB is not open"
@@ -490,16 +496,18 @@ class Database():
 
         # Create command
         setStr = "SET "
-        flds = self.GetCategoryAllFieldInfo()
-        for iFld in range(len(flds)):
+        template = self.GetCategoryTemplate()
+        print "ttttt", template
+        for iFld in range(self.numCategoryFields):
             if (type(lst[iFld]) is types.IntType):
-                setStr = setStr + "%s=%d," %(flds[iFld].SqlName,lst[iFld])
+                setStr = setStr + "%s=%d," %(template.sqlNames[iFld],lst[iFld])
             else:                
-                setStr = setStr + '%s="%s",' %(flds[iFld].SqlName,lst[iFld])
+                setStr = setStr + '%s="%s",' %(template.sqlNames[iFld],lst[iFld])
             #
         #
         setStr = setStr[:-1]
-        cmd = "UPDATE CategoryTbl %s WHERE CategoryNo=%s" % (setStr,myCategoryNo)
+        cmd = "UPDATE CategoryTbl %s WHERE CategoryId=%s" % (setStr,myCategoryId)
+        print cmd
 
         # Execute the command
         try:
@@ -508,7 +516,7 @@ class Database():
                 self.conn.commit()
             #
         except sqlite3.Error as e:
-            print __name__, e.args[0]
+            print inspect.stack()[0][3], e.args[0]
         #
     #
 
@@ -517,14 +525,14 @@ class Database():
     # 
     ###################################################################
     def GetNumCategoryFields(self):  
-        return self.numPartFields
+        return self.numCategoryFields
     #
 
     ###################################################################
     # Get all a list of field info for all parts
     ###################################################################
     def GetCategoryTemplate(self):  
-        return self.templatePart
+        return self.templateCategory
     #
 
 
@@ -532,7 +540,7 @@ class Database():
 
   
     ###################################################################
-    # Get a list of all projects
+    #
     ###################################################################
     def GetAllProjects(self):
 
@@ -548,14 +556,14 @@ class Database():
                 rows.append(row)
             #
         except sqlite3.Error as e:
-            print __name__, e.args[0]
+            print inspect.stack()[0][3], e.args[0]
         #
 
         return rows  
     #
   
     ###################################################################
-    # Get a project by a filed and value
+    #
     ###################################################################
     def GetProjectByFieldValue(self, field, value):
 
@@ -563,22 +571,22 @@ class Database():
             print "DB is not open"
             return
         #
-        cmd = "SELECT * FROM ProjectTbl WHERE %s == %s" % (field, str(value))
+
+        cmd = "SELECT * FROM ProjectTbl WHERE %s == '%s'" % (field, str(value))
         try:
             rows = []
             for row in self.c.execute(cmd):
                 rows.append(row)
             #
         except sqlite3.Error as e:
-            print __name__, e.args[0]
+            print inspect.stack()[0][3], e.args[0]
         #
 
         return rows  
     #
   
-  
     ###################################################################
-    #
+    # Get a Project ID by its name
     ###################################################################
     def GetProjectIdByName(self, name):
 
@@ -597,14 +605,16 @@ class Database():
                 rows.append(row)
             #
         except sqlite3.Error as e:
-            print __name__, e.args[0]
+            print inspect.stack()[0][3], e.args[0]
             retval = 0
         #
 
         # Insure we only got one and only one answer
         if (len(rows) == 0):
+            print "Project", name, "not found"
             retval = 0
         elif (len(rows) > 1):
+            print "Project", name, "found more than once"
             retval = 0
         else:
             retval = rows[0][0]
@@ -614,8 +624,8 @@ class Database():
     #
   
     ###################################################################
-    # Add a project
-    # Return the new ID
+    # Add a new project
+    # Return new ID
     ###################################################################
     def AddProject(self, project, commit=True):
 
@@ -623,7 +633,6 @@ class Database():
             print "DB is not open"
             return
         #
-
         cmd = "INSERT INTO ProjectTbl VALUES (%s)" % (project.makeRecord())
         try:
             self.c.execute(cmd)
@@ -633,37 +642,37 @@ class Database():
             retval = self.c.lastrowid
             
         except sqlite3.Error as e:
-            print __name__, e.args[0]
+            print inspect.stack()[0][3], e.args[0]
             retval = 0
         #
+
         return retval
     #
   
     ###################################################################
-    # Delete a project
+    # Delete a project by id
     ###################################################################
-    def DelProject(self, myProjectNo, commit=True):
+    def DelProject(self, myProjectId, commit=True):
 
         if (not self.dbOpen):
             print "DB is not open"
             return
         #
-
-        cmd = "DELETE FROM ProjectTbl WHERE ProjectNo=%s" % (myProjectNo)
+        cmd = "DELETE FROM ProjectTbl WHERE ProjectId=%s" % (myProjectId)
         try:
             self.c.execute(cmd)
             if commit:
                 self.conn.commit()
             #
         except sqlite3.Error as e:
-            print __name__, e.args[0]
+            print inspect.stack()[0][3], e.args[0]
         #
     #
   
     ###################################################################
-    # Update a project from a full list
+    # Update a project with a full list
     ###################################################################
-    def UpdateProject(self, myProjectNo, lst, commit=True):
+    def UpdateProject(self, myProjectId, lst, commit=True):
 
         if (not self.dbOpen):
             print "DB is not open"
@@ -672,16 +681,18 @@ class Database():
 
         # Create command
         setStr = "SET "
-        flds = self.GetProjectAllFieldInfo()
-        for iFld in range(len(flds)):
+        template = self.GetProjectTemplate()
+        print "uuuuu", template
+        for iFld in range(self.numProjectFields):
             if (type(lst[iFld]) is types.IntType):
-                setStr = setStr + "%s=%d," %(flds[iFld].SqlName,lst[iFld])
+                setStr = setStr + "%s=%d," %(template.sqlNames[iFld],lst[iFld])
             else:                
-                setStr = setStr + '%s="%s",' %(flds[iFld].SqlName,lst[iFld])
+                setStr = setStr + '%s="%s",' %(template.sqlNames[iFld],lst[iFld])
             #
         #
         setStr = setStr[:-1]
-        cmd = "UPDATE ProjectTbl %s WHERE ProjectNo=%s" % (setStr,myProjectNo)
+        cmd = "UPDATE ProjectTbl %s WHERE ProjectId=%s" % (setStr,myProjectId)
+        print cmd
 
         # Execute the command
         try:
@@ -690,7 +701,7 @@ class Database():
                 self.conn.commit()
             #
         except sqlite3.Error as e:
-            print __name__, e.args[0]
+            print inspect.stack()[0][3], e.args[0]
         #
     #
 
@@ -705,16 +716,13 @@ class Database():
     ###################################################################
     # Get all a list of field info for all parts
     ###################################################################
-    def GetProjectAllFieldInfo(self):  
-        return self.templateProject.getAllFieldInfo()
+    def GetProjectTemplate(self):  
+        return self.templateProject
     #
 
-    ###################################################################
-    # Get field info for a given field
-    ###################################################################
-    def GetProjectFieldInfo(self, i):  
-        return self.templateProject.getFieldInfo(i)
-    #
+
+
+  
 
 
 
@@ -745,7 +753,7 @@ class Database():
                 self.c.execute(cmd)
                 self.conn.commit()
             except sqlite3.Error as e:
-                print __name__, e.args[0]
+                print inspect.stack()[0][3], e.args[0]
             #
             return self.c.lastrowid
         #
@@ -777,7 +785,7 @@ class Database():
                 self.c.execute(cmd)
                 self.conn.commit()
             except sqlite3.Error as e:
-                print __name__, e.args[0]
+                print inspect.stack()[0][3], e.args[0]
             #
             return self.c.lastrowid
         #
@@ -823,6 +831,7 @@ if __name__ == "__main__":
 
     # Delete the SQlite database file if it exists
     try:
+        print "Delete existing DB"
         os.remove("parts.db")
     except:
         pass

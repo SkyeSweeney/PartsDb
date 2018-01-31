@@ -6,6 +6,7 @@ import sys
 import types
 
 import CategoryDlg
+import Category
 
 
 #######################################################################
@@ -25,15 +26,15 @@ class CategoryTab(gridlib.Grid):
         self.moveTo = None
 
         # Get list of all field info
-        part = self.db.GetCategoryTemplate()
-        n    = self.db.GetNumCategoryFields()
+        template = self.db.GetCategoryTemplate()
+        n        = self.db.GetNumCategoryFields()
 
         # Create Grid
         self.CreateGrid(0, n)  # Row, col
 
         # Add the column headers
         for iFld in range(n):
-            self.SetColLabelValue(iFld, part.humanNames[iFld])
+            self.SetColLabelValue(iFld, template.humanNames[iFld])
         #
 
         # Column widths
@@ -105,6 +106,27 @@ class CategoryTab(gridlib.Grid):
     #
 
 
+    ###################################################################
+    # Redraw grid
+    ###################################################################
+    def RedrawGrid(self):
+
+        # For each item in the database
+        rows = self.db.GetAllCategorys()
+        iRow = 0
+        for lst in rows:
+            self.UpdateRecord(iRow, lst)
+            for iCol in range(len(lst)):
+                self.SetReadOnly(iRow, iCol, True)
+            #
+            iRow = iRow + 1
+        #
+
+        return iRow
+
+    #
+
+
 
     ###################################################################
     # Left click
@@ -134,9 +156,9 @@ class CategoryTab(gridlib.Grid):
         selectedRow = evt.GetRow()
         selectedCol = evt.GetCol()
 
-        categoryNo = self.GetCellValue(selectedRow, 0)
+        categoryId = self.GetCellValue(selectedRow, 0)
 
-        self.EditCategory(categoryNo, selectedCol)
+        self.EditCategory(categoryId, selectedCol)
 
         evt.Skip()
     #
@@ -158,14 +180,14 @@ class CategoryTab(gridlib.Grid):
 
 
     ###################################################################
-    # Add part
+    # Add Category
     ###################################################################
     def AddCategory(self):
 
-        # Create a blank part
+        # Create a blank category
         category = Category.Category()
 
-        # Add part to database
+        # Add category to database
         self.db.AddCategory(category)
 
         # Add entry in table
@@ -178,13 +200,13 @@ class CategoryTab(gridlib.Grid):
     #
 
     ###################################################################
-    # Edit part (and focus on given column)
+    # Edit Category (and focus on given column)
     ###################################################################
-    def EditCategory(self, categoryNo, selectedCol):
+    def EditCategory(self, categoryId, selectedCol):
 
 
         # Open the edit dialog
-        dlg = CategoryDlg.CategoryDlg(self, -1, "Edit", categoryNo, selectedCol, self.db)
+        dlg = CategoryDlg.CategoryDlg(self, -1, "Edit", categoryId, selectedCol, self.db)
         dlg.CenterOnScreen()
 
         # Display dialog and wait for OK or Cancel
@@ -197,7 +219,7 @@ class CategoryTab(gridlib.Grid):
             newLst = dlg.GetCategoryData()
 
             # Update the database
-            self.db.UpdateCategory(categoryNo, newLst)
+            self.db.UpdateCategory(categoryId, newLst)
 
             # Redraw the grid
             self.RedrawGrid()
@@ -254,24 +276,24 @@ class CategoryTab(gridlib.Grid):
 
             # Edit
             elif (retval == 1):
-                categoryNo = self.GetCellValue(row, 0)
-                self.EditCategory(categoryNo, col)
+                categoryId = self.GetCellValue(row, 0)
+                self.EditCategory(categoryId, col)
 
             # Delete
             elif (retval == 2):
-                categoryNo = self.GetCellValue(row, 0)
-                self.DeleteCategory(categoryNo)
+                categoryId = self.GetCellValue(row, 0)
+                self.DeleteCategory(categoryId)
 
             # Add
             elif (retval == 3):
 
-                # Add the part
+                # Add the category
                 row = self.AddCategory()
 
                 # Now force it do be edited
-                categoryNo = self.GetCellValue(row, 0)
+                categoryId = self.GetCellValue(row, 0)
 
-                self.EditCategory(partNo, 2)
+                self.EditCategory(categoryId, 2)
 
             # Bad answer
             else:

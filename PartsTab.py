@@ -24,15 +24,15 @@ class PartsTab(gridlib.Grid):
         self.db = db
 
         # Get list of all field info
-        part = self.db.GetPartTemplate()
-        n    = self.db.GetNumPartFields()
+        template = self.db.GetPartTemplate()
+        n        = self.db.GetNumPartFields()
 
         # Create Grid
         self.CreateGrid(0, n)  # Row, col
 
         # Add the column headers
         for iFld in range(n):
-            self.SetColLabelValue(iFld, part.humanNames[iFld])
+            self.SetColLabelValue(iFld, template.humanNames[iFld])
         #
 
         # Set column widths
@@ -102,6 +102,27 @@ class PartsTab(gridlib.Grid):
                 self.SetCellValue(row, col,  lst[col])
             #
         #
+    #
+
+
+    ###################################################################
+    # Redraw grid
+    ###################################################################
+    def RedrawGrid(self):
+
+        # For each item in the database
+        rows = self.db.GetAllParts()
+        iRow = 0
+        for lst in rows:
+            self.UpdateRecord(iRow, lst)
+            for iCol in range(len(lst)):
+                self.SetReadOnly(iRow, iCol, True)
+            #
+            iRow = iRow + 1
+        #
+
+        return iRow
+
     #
 
 

@@ -18,7 +18,7 @@ class ProjectDlg(wx.Dialog):
                  parent, 
                  ID, 
                  title, 
-                 projectNo,
+                 projectId,
                  selectedCol,
                  db,
                  size=wx.DefaultSize, 
@@ -27,7 +27,7 @@ class ProjectDlg(wx.Dialog):
                  ):
 
         self.db = db
-        self.projectNo = projectNo
+        self.projectId = projectId
 
         wx.Dialog.__init__(self, 
                            None, 
@@ -36,13 +36,15 @@ class ProjectDlg(wx.Dialog):
                            style=wx.DEFAULT_DIALOG_STYLE|wx.THICK_FRAME|wx.RESIZE_BORDER|wx.TAB_TRAVERSAL)
 
         # Get the project data for this row
-        rows = self.db.GetProjectBy("ProjectNo", self.projectNo)
+        rows = self.db.GetProjectByFieldValue("ProjectId", self.projectId)
 
         if (len(rows) != 1):
             print "Invalid results"
             sys.exit(1)
         #
         row = rows[0]
+
+        print "row", row,self.db.GetNumProjectFields()
 
         # Create a project from the row
         project = Project.Project()
@@ -52,20 +54,20 @@ class ProjectDlg(wx.Dialog):
         vSizer = wx.BoxSizer(wx.VERTICAL)
 
         # Get list of all fields
-        flds = self.db.GetProjectAllFieldInfo()
+        template = self.db.GetProjectTemplate()
 
         self.values = []
 
         # For each field in the project
-        for iFld in range(len(flds)):
+        for iFld in range(self.db.GetNumProjectFields()):
 
             # Create a sizer for row
             hSizer = wx.BoxSizer(wx.HORIZONTAL)
 
             # Create label for field name
-            label = wx.StaticText(self, -1, flds[iFld].HumanName)
+            label = wx.StaticText(self, -1, template.humanNames[iFld])
 
-            if (flds[iFld].Editable):
+            if (template.editables[iFld]):
                 st = 0
             else:
                 st = wx.TE_READONLY
@@ -124,15 +126,15 @@ class ProjectDlg(wx.Dialog):
         retval = []
 
         # Get list of all fields
-        flds = self.db.GetProjectAllFieldInfo()
+        template = self.db.GetProjectTemplate()
 
         # For each field in the project
-        for iFld in range(len(flds)):
+        for iFld in range(self.db.GetNumProjectFields()):
 
             val = self.values[iFld].GetValue()
 
             # Create item to hold value
-            if (type(flds[iFld].SqlType) is types.IntType):
+            if (type(template.sqlTypes[iFld]) is types.IntType):
                 retval.append(int(val))
             else:
                 retval.append(val)
